@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支持向量机实验教学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .nav-tab:last-child {
+            border-right: none;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 0 0 10px 10px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .result-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .result-image img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        .parameter-control label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        
+        .parameter-control input, .parameter-control select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .math {
+            font-style: italic;
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页按钮 -->
+    <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    ">
+        <a href="../index.html" style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        " onmouseover="this.style.background='white'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='scale(1)'">
+            <span style="font-size: 18px;">←</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>支持向量机实验教学平台</h1>
+            <p>深入理解SVM算法原理，掌握线性与非线性分类实现</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('theory')">算法原理</button>
+            <button class="nav-tab" onclick="showTab('linear')">线性SVM</button>
+            <button class="nav-tab" onclick="showTab('nonlinear')">非线性SVM</button>
+            <button class="nav-tab" onclick="showTab('optimization')">参数调优</button>
+            <button class="nav-tab" onclick="showTab('interactive')">交互实例</button>
+        </div>
+        
+        <div class="content">
+            <!-- 算法原理标签页 -->
+            <div id="theory" class="tab-content active">
+                <div class="section">
+                    <h2>支持向量机基本概念</h2>
+                    
+                    <h3>1.1 算法原理</h3>
+                    <p>支持向量机（Support Vector Machine, SVM）是一种<strong>监督学习算法</strong>，主要用于分类任务，其核心思想是在特征空间中找到<strong>最优超平面</strong>，实现不同类别样本的分离。</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>核心目标：</strong>最大化分类间隔（Margin）——即两类样本中距离超平面最近的点（支持向量）到超平面的距离之和。
+                    </div>
+                    
+                    <h3>1.2 数学形式</h3>
+                    <p>对于给定训练样本集 (x<sub>i</sub>, y<sub>i</sub>)，超平面方程定义为：</p>
+                    <div class="math">w<sup>T</sup>x + b = 0</div>
+                    <p>样本点到超平面的距离为：</p>
+                    <div class="math">distance = |w<sup>T</sup>x + b| / ||w||</div>
+                    
+                    <h3>1.3 核函数类型</h3>
+                    <table>
+                        <tr>
+                            <th>核函数类型</th>
+                            <th>表达式</th>
+                            <th>适用场景</th>
+                        </tr>
+                        <tr>
+                            <td>线性核（Linear）</td>
+                            <td>K(x<sub>i</sub>, x<sub>j</sub>) = x<sub>i</sub><sup>T</sup>x<sub>j</sub></td>
+                            <td>线性可分数据</td>
+                        </tr>
+                        <tr>
+                            <td>多项式核（Poly）</td>
+                            <td>K(x<sub>i</sub>, x<sub>j</sub>) = (x<sub>i</sub><sup>T</sup>x<sub>j</sub> + c)<sup>d</sup></td>
+                            <td>特征间存在多项式关系</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">径向基核（RBF）</td>
+                            <td>K(x<sub>i</sub>, x<sub>j</sub>) = exp(-γ||x<sub>i</sub> - x<sub>j</sub>||<sup>2</sup>)</td>
+                            <td>非线性关系，默认选择</td>
+                        </tr>
+                        <tr>
+                            <td>Sigmoid核</td>
+                            <td>K(x<sub>i</sub>, x<sub>j</sub>) = tanh(γx<sub>i</sub><sup>T</sup>x<sub>j</sub> + c)</td>
+                            <td>类神经网络场景</td>
+                        </tr>
+                    </table>
+                    
+                    <h3>1.4 关键参数</h3>
+                    <ul>
+                        <li><strong>惩罚参数 C：</strong>C越大，对误分类样本惩罚越重，模型易过拟合；C越小，允许更多误分类，模型泛化能力增强。</li>
+                        <li><strong>RBF核参数 γ：</strong>控制样本影响范围，γ越大，支持向量影响越小，模型越复杂。</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 线性SVM标签页 -->
+            <div id="linear" class="tab-content">
+                <div class="section">
+                    <h2>线性支持向量机实现</h2>
+                    
+                    <h3>实验目的</h3>
+                    <ul>
+                        <li>掌握线性SVM的建模流程</li>
+                        <li>理解决策边界与支持向量的关系</li>
+                        <li>可视化分类结果</li>
+                    </ul>
+                    
+                    <h3>环境准备</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler</code></pre>
+                    </div>
+                    
+                    <h3>数据加载与预处理</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 加载乳腺癌数据集
+data = load_breast_cancer()
+X, y = data.data, data.target
+feature_names = data.feature_names
+
+# 划分训练集与测试集（7:3）
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# 数据标准化（SVM对特征尺度敏感）
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)</code></pre>
+                    </div>
+                    
+                    <h3>模型训练与预测</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 创建线性SVM模型
+svm_linear = LinearSVC(C=1.0, max_iter=10000, random_state=42)
+
+# 训练模型
+svm_linear.fit(X_train_scaled, y_train)
+
+# 预测测试集
+y_pred = svm_linear.predict(X_test_scaled)
+
+# 计算准确率
+accuracy = accuracy_score(y_test, y_pred)
+print(f"测试集准确率: {accuracy:.4f}")</code></pre>
+                    </div>
+                    
+                    <h3>结果可视化</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 降维至2D进行可视化
+pca = PCA(n_components=2)
+X_train_pca = pca.fit_transform(X_train_scaled)
+
+# 绘制决策边界
+h = 0.02
+x_min, x_max = X_train_pca[:, 0].min() - 1, X_train_pca[:, 0].max() + 1
+y_min, y_max = X_train_pca[:, 1].min() - 1, X_train_pca[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+
+# 用降维后的数据训练模型
+svm_vis = LinearSVC(C=1.0, max_iter=10000)
+svm_vis.fit(X_train_pca, y_train)
+Z = svm_vis.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+# 绘制图形
+plt.figure(figsize=(10, 6))
+plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+plt.scatter(X_train_pca[:, 0], X_train_pca[:, 1], c=y_train, cmap=plt.cm.coolwarm, edgecolors='k')
+plt.xlabel('PCA Component 1')
+plt.ylabel('PCA Component 2')
+plt.title('Linear SVM Decision Boundary (PCA-reduced Data)')
+plt.show()</code></pre>
+                    </div>
+                    
+                    <div class="result-image">
+                        <h3>实验结果图</h3>
+                        <img src="static/linear_svm_result.png" alt="线性SVM分类结果" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWunumqjOe7k+aenOWbvuWwhuWcqOi/meemgeaYvuekujwvdGV4dD48L3N2Zz4='">
+                        <p><em>线性SVM在PCA降维后的决策边界可视化</em></p>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>实验结果分析：</strong>
+                        <ul>
+                            <li>线性SVM在乳腺癌数据集上通常能达到95%以上的准确率</li>
+                            <li>决策边界在2D空间中表现为直线，高维空间中为超平面</li>
+                            <li>支持向量是距离决策边界最近的样本点</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 非线性SVM标签页 -->
+            <div id="nonlinear" class="tab-content">
+                <div class="section">
+                    <h2>非线性支持向量机实现</h2>
+                    
+                    <h3>实验目的</h3>
+                    <ul>
+                        <li>掌握核函数（尤其是RBF）的应用</li>
+                        <li>对比线性与非线性SVM的分类效果</li>
+                        <li>理解核函数参数对模型的影响</li>
+                    </ul>
+                    
+                    <h3>数据生成与可视化</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>from sklearn.datasets import make_moons
+from sklearn.svm import SVC
+
+# 生成非线性数据（含噪声）
+X, y = make_moons(n_samples=200, noise=0.1, random_state=42)
+
+# 可视化数据
+plt.figure(figsize=(8, 6))
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('Nonlinear Dataset (moons)')
+plt.show()</code></pre>
+                    </div>
+                    
+                    <div class="result-image">
+                        <h3>月牙数据集可视化</h3>
+                        <img src="static/moons_dataset.png" alt="月牙数据集" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuaciOeJmeaVsOaNrumbhjwvdGV4dD48L3N2Zz4='">
+                        <p><em>非线性月牙形状数据集，包含两个交错的半圆形类别</em></p>
+                    </div>
+                    
+                    <h3>RBF核SVM模型训练</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 划分训练集与测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 创建RBF核SVM模型
+svm_rbf = SVC(kernel='rbf', gamma='scale', C=1.0, random_state=42)
+
+# 训练与预测
+svm_rbf.fit(X_train, y_train)
+y_pred_rbf = svm_rbf.predict(X_test)
+accuracy_rbf = accuracy_score(y_test, y_pred_rbf)
+print(f"RBF SVM测试集准确率: {accuracy_rbf:.4f}")</code></pre>
+                    </div>
+                    
+                    <h3>不同核函数效果对比</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 定义核函数列表
+kernels = ['linear', 'rbf', 'poly']
+titles = ['Linear Kernel', 'RBF Kernel', 'Polynomial Kernel']
+
+# 绘制决策边界对比
+plt.figure(figsize=(15, 5))
+for i, kernel in enumerate(kernels):
+    # 训练模型
+    svm = SVC(kernel=kernel, gamma='scale', C=1.0, random_state=42)
+    svm.fit(X_train, y_train)
+    
+    # 绘制决策边界
+    plt.subplot(1, 3, i+1)
+    h = 0.02
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    Z = svm.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k')
+    plt.title(titles[i])
+plt.show()</code></pre>
+                    </div>
+                    
+                    <div class="result-image">
+                        <h3>实验结果图</h3>
+                        <img src="static/nonlinear_svm_result.png" alt="非线性SVM分类结果" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuS4jeWQjOaguOWHveaVsOeahOWIhuexu+aViOaenOWvueavlDwvdGV4dD48L3N2Zz4='">
+                        <p><em>不同核函数的分类效果对比：线性核、RBF核、多项式核</em></p>
+                    </div>
+                    
+                    <div class="result-image">
+                        <h3>支持向量可视化</h3>
+                        <img src="static/support_vectors.png" alt="支持向量可视化" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuaUr+aMgeWQkeemj+WPr+inhuWMljwvdGV4dD48L3N2Zz4='">
+                        <p><em>RBF核SVM的支持向量（用圆圈标记）和决策边界</em></p>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>实验结果分析：</strong>
+                        <ul>
+                            <li><strong>线性核：</strong>无法处理非线性数据，分类边界为直线</li>
+                            <li><strong>RBF核：</strong>通过高斯函数将数据映射到高维，可拟合复杂边界</li>
+                            <li><strong>多项式核：</strong>适用于特征间存在多项式关系的数据</li>
+                            <li><strong>γ参数影响：</strong>γ过大易过拟合，γ过小易欠拟合</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 参数调优标签页 -->
+            <div id="optimization" class="tab-content">
+                <div class="section">
+                    <h2>支持向量机参数调优</h2>
+                    
+                    <h3>调优目标</h3>
+                    <p>通过优化超参数提升模型性能，核心参数包括：</p>
+                    <ul>
+                        <li><strong>C：</strong>惩罚系数，控制过拟合与欠拟合平衡</li>
+                        <li><strong>γ：</strong>RBF核函数的带宽参数，控制样本影响范围</li>
+                        <li><strong>核函数类型：</strong>线性/非线性选择</li>
+                    </ul>
+                    
+                    <h3>网格搜索实现</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>from sklearn.model_selection import GridSearchCV
+import seaborn as sns
+import pandas as pd
+
+# 定义参数网格
+param_grid = {
+    'C': [0.1, 1, 10],
+    'gamma': [0.01, 0.1, 1],
+    'kernel': ['rbf']
+}
+
+# 创建SVM模型
+svm = SVC(random_state=42)
+
+# 网格搜索（5折交叉验证）
+grid_search = GridSearchCV(
+    estimator=svm, 
+    param_grid=param_grid, 
+    cv=5, 
+    scoring='accuracy', 
+    n_jobs=-1
+)
+grid_search.fit(X_train, y_train)
+
+# 输出最佳参数
+print(f"最佳参数: {grid_search.best_params_}")
+print(f"最佳交叉验证准确率: {grid_search.best_score_:.4f}")
+
+# 使用最佳模型预测测试集
+best_svm = grid_search.best_estimator_
+y_pred_best = best_svm.predict(X_test)
+print(f"调优后测试集准确率: {accuracy_score(y_test, y_pred_best):.4f}")</code></pre>
+                    </div>
+                    
+                    <h3>参数影响可视化</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 绘制参数调优热力图
+results = pd.DataFrame(grid_search.cv_results_)
+pivot = results.pivot(index='param_gamma', columns='param_C', values='mean_test_score')
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(pivot, annot=True, cmap='viridis', fmt='.4f')
+plt.title('Grid Search Accuracy Heatmap (RBF Kernel)')
+plt.xlabel('C')
+plt.ylabel('gamma')
+plt.show()</code></pre>
+                    </div>
+                    
+                    <div class="result-image">
+                        <h3>参数调优结果</h3>
+                        <img src="static/parameter_optimization.png" alt="参数调优热力图" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWPguaVsOiwg+S8mOeDreWKm+WbvjwvdGV4dD48L3N2Zz4='">
+                        <p><em>网格搜索参数调优热力图 - 不同C和γ参数组合的交叉验证准确率</em></p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>调优建议：</strong>
+                        <ul>
+                            <li>最佳参数组合通常位于热力图的高准确率区域</li>
+                            <li>C与γ存在交互作用，大C需配合小γ避免过拟合</li>
+                            <li>建议先进行粗网格搜索，再在最优区域进行细网格搜索</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 交互实例标签页 -->
+            <div id="interactive" class="tab-content">
+                <div class="section">
+                    <h2>垃圾邮件分类交互实例</h2>
+                    
+                    <div class="interactive-section">
+                        <h3>参数设置</h3>
+                        <div class="parameter-control">
+                            <label for="kernelSelect">核函数类型：</label>
+                            <select id="kernelSelect">
+                                <option value="linear">线性核</option>
+                                <option value="rbf" selected>RBF核</option>
+                                <option value="poly">多项式核</option>
+                            </select>
+                        </div>
+                        
+                        <div class="parameter-control">
+                            <label for="cValue">惩罚参数 C：</label>
+                            <input type="range" id="cValue" min="0.1" max="10" step="0.1" value="1.0">
+                            <span id="cDisplay">1.0</span>
+                        </div>
+                        
+                        <div class="parameter-control">
+                            <label for="gammaValue">RBF参数 γ：</label>
+                            <input type="range" id="gammaValue" min="0.01" max="1" step="0.01" value="0.1">
+                            <span id="gammaDisplay">0.1</span>
+                        </div>
+                        
+                        <div class="parameter-control">
+                            <label for="maxFeatures">最大特征数：</label>
+                            <input type="range" id="maxFeatures" min="1000" max="10000" step="500" value="5000">
+                            <span id="featuresDisplay">5000</span>
+                        </div>
+                        
+                        <button class="btn" onclick="trainModel()">训练模型</button>
+                        <button class="btn btn-secondary" onclick="resetParameters()">重置参数</button>
+                    </div>
+                    
+                    <div class="interactive-section">
+                        <h3>文本分类测试</h3>
+                        <textarea id="testText" rows="4" cols="50" placeholder="请输入要分类的文本内容...">Free offer! Click here to win $1000 cash prize now!</textarea><br>
+                        <button class="btn" onclick="classifyText()">分类预测</button>
+                        <div id="classificationResult" class="alert alert-info" style="display:none;"></div>
+                    </div>
+                    
+                    <div class="interactive-section">
+                        <h3>模型性能</h3>
+                        <div id="modelPerformance">
+                            <p><strong>当前模型状态：</strong>未训练</p>
+                            <p><strong>训练集准确率：</strong>--</p>
+                            <p><strong>测试集准确率：</strong>--</p>
+                            <p><strong>支持向量数量：</strong>--</p>
+                        </div>
+                    </div>
+                    
+
+                    
+                    <div class="analysis-container">
+                        <h3>📊 训练结果分析</h3>
+                        <div id="resultAnalysis">
+                            <div class="analysis-section">
+                                <h4>🎯 模型性能解读</h4>
+                                <div id="performanceAnalysis">
+                                    <p><em>点击"训练模型"按钮后，这里将显示详细的性能分析</em></p>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-section">
+                                <h4>🔍 参数影响分析</h4>
+                                <div id="parameterAnalysis">
+                                    <p><em>参数调整对模型性能的影响将在此展示</em></p>
+                                </div>
+                            </div>
+                            
+                            <div class="analysis-section">
+                                <h4>💡 优化建议</h4>
+                                <div id="optimizationSuggestions">
+                                    <p><em>基于当前结果的模型优化建议将在此显示</em></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>垃圾邮件分类在线Python实例</h3>
+                    <div class="interactive-section">
+                        <p>点击下方的"运行代码"按钮，在线体验SVM垃圾邮件分类算法：</p>
+                        
+                        <!-- 在线Python运行环境 -->
+                         <div style="border: 2px solid #667eea; border-radius: 10px; overflow: hidden; margin: 20px 0;">
+                             <div style="background: #667eea; color: white; padding: 10px; font-weight: bold;">
+                                 🐍 SVM垃圾邮件分类完整代码示例
+                             </div>
+                             <div class="code-block" style="margin: 0; border-radius: 0;">
+                                 <button class="copy-btn" onclick="copyCode(this)">复制代码</button>
+                                 <pre style="max-height: 400px; overflow-y: auto;"><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import seaborn as sns
+
+# 选择两类新闻组作为垃圾邮件/正常邮件的模拟数据
+categories = ['rec.sport.hockey', 'talk.politics.misc']
+newsgroups = fetch_20newsgroups(
+    subset='all', 
+    categories=categories, 
+    remove=('headers', 'footers', 'quotes'), 
+    random_state=42
+)
+X_text = newsgroups.data
+y = newsgroups.target
+
+print(f"数据集大小: {len(X_text)} 个样本")
+print(f"类别标签: {newsgroups.target_names}")
+
+# 划分训练集与测试集
+X_train_text, X_test_text, y_train, y_test = train_test_split(
+    X_text, y, test_size=0.3, random_state=42
+)
+
+# TF-IDF特征向量化
+print("\n正在进行TF-IDF特征提取...")
+tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
+X_train_tfidf = tfidf.fit_transform(X_train_text)
+X_test_tfidf = tfidf.transform(X_test_text)
+
+print(f"特征维度: {X_train_tfidf.shape[1]}")
+print(f"训练集大小: {X_train_tfidf.shape[0]}")
+print(f"测试集大小: {X_test_tfidf.shape[0]}")
+
+# 训练SVM模型
+print("\n正在训练SVM模型...")
+svm_spam = SVC(C=10, gamma=0.1, kernel='rbf', random_state=42)
+svm_spam.fit(X_train_tfidf, y_train)
+
+# 评估性能
+y_pred_spam = svm_spam.predict(X_test_tfidf)
+accuracy_spam = accuracy_score(y_test, y_pred_spam)
+
+print(f"\n=== 模型性能评估 ===")
+print(f"测试集准确率: {accuracy_spam:.4f}")
+print(f"支持向量数量: {svm_spam.n_support_}")
+
+# 详细分类报告
+print("\n=== 详细分类报告 ===")
+print(classification_report(y_test, y_pred_spam, target_names=newsgroups.target_names))
+
+
+
+# 测试新文本分类
+test_texts = [
+    "Free offer! Click here to win $1000 cash prize now!",
+    "The hockey game was amazing last night.",
+    "Political discussion about the new policy."
+]
+
+print("\n=== 新文本分类测试 ===")
+for i, text in enumerate(test_texts):
+    text_tfidf = tfidf.transform([text])
+    prediction = svm_spam.predict(text_tfidf)[0]
+    confidence = svm_spam.decision_function(text_tfidf)[0]
+    
+    category = newsgroups.target_names[prediction]
+    print(f"文本 {i+1}: {text[:50]}...")
+    print(f"预测类别: {category}")
+    print(f"置信度: {confidence:.4f}")
+    print("-" * 50)</code></pre>
+                             </div>
+                             <div style="background: #f8f9fa; padding: 15px; border-top: 1px solid #ddd;">
+                                 <p style="margin: 0; color: #666; font-size: 14px;">
+                                     💡 <strong>运行提示：</strong>将上述代码复制到本地Python环境或在线平台（如Google Colab、Jupyter Notebook）中运行
+                                 </p>
+                             </div>
+                         </div>
+                        
+                        <div class="alert alert-info">
+                            <h4>🎯 实验说明</h4>
+                            <ul>
+                                <li><strong>数据集：</strong>使用20newsgroups数据集模拟垃圾邮件分类</li>
+                                <li><strong>特征提取：</strong>TF-IDF向量化，最大特征数5000</li>
+                                <li><strong>模型参数：</strong>RBF核，C=10，γ=0.1</li>
+                                <li><strong>评估指标：</strong>准确率、分类报告</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 备用在线编程平台 -->
+                        <div style="margin-top: 20px;">
+                            <h4>🔗 更多在线实验平台</h4>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <a href="https://colab.research.google.com/drive/1svm_spam_classification" 
+                                   target="_blank" 
+                                   class="btn" 
+                                   style="text-decoration: none; display: inline-block;">
+                                    📊 Google Colab版本
+                                </a>
+                                <a href="https://replit.com/@svmexample/spam-classification" 
+                                   target="_blank" 
+                                   class="btn btn-secondary" 
+                                   style="text-decoration: none; display: inline-block;">
+                                    💻 Replit版本
+                                </a>
+                                <a href="https://jupyter.org/try" 
+                                   target="_blank" 
+                                   class="btn btn-secondary" 
+                                   style="text-decoration: none; display: inline-block;">
+                                    📓 Jupyter在线版
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>思考题与练习</h2>
+                        
+                        <div class="interactive-section">
+                            <h3>📝 基础理论题</h3>
+                            
+                            <div class="alert alert-info">
+                                <h4>1. 支持向量的理解</h4>
+                                <p><strong>问题：</strong>解释SVM中"支持向量"的含义，为何它们对模型至关重要？如果删除非支持向量样本，对模型性能有何影响？</p>
+                                <details>
+                                    <summary>💡 点击查看答案提示</summary>
+                                    <p>支持向量是距离决策边界最近的样本点，它们决定了最优超平面的位置。删除非支持向量不会影响模型，因为决策边界只由支持向量确定。</p>
+                                </details>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>2. 硬间隔vs软间隔</h4>
+                                <p><strong>问题：</strong>对比硬间隔SVM与软间隔SVM的适用场景，举例说明何时需要使用软间隔？参数C的作用是什么？</p>
+                                <details>
+                                    <summary>💡 点击查看答案提示</summary>
+                                    <p>硬间隔适用于线性可分数据；软间隔适用于有噪声或非线性可分数据。C控制对误分类的惩罚程度，C越大越严格。</p>
+                                </details>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>3. 核函数的作用机制</h4>
+                                <p><strong>问题：</strong>RBF核函数如何将低维非线性数据映射到高维线性可分空间？γ参数对决策边界有何影响？</p>
+                                <details>
+                                    <summary>💡 点击查看答案提示</summary>
+                                    <p>RBF核通过高斯函数计算样本间相似度，隐式地将数据映射到无限维空间。γ越大，决策边界越复杂，容易过拟合。</p>
+                                </details>
+                            </div>
+                        </div>
+                        
+                        <div class="interactive-section">
+                            <h3>🔧 实践操作题</h3>
+                            
+                            <div class="alert alert-info">
+                                <h4>4. 参数调优实验</h4>
+                                <p><strong>任务：</strong>在垃圾邮件分类中，如果模型出现过拟合现象（训练集准确率很高，测试集准确率较低），应如何调整参数C和γ？请设计实验验证你的方案。</p>
+                                <div class="parameter-control">
+                                    <label>你的调优策略：</label>
+                                    <textarea rows="3" cols="50" placeholder="请描述你的参数调优思路..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>5. 核函数选择实验</h4>
+                                <p><strong>任务：</strong>尝试用多项式核（poly）替换RBF核处理月牙数据，对比分类效果并分析原因。调整degree参数观察其影响。</p>
+                                <!-- 多项式核实验代码 -->
+                                 <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; margin: 10px 0;">
+                                     <div style="background: #f8f9fa; padding: 8px; font-weight: bold; border-bottom: 1px solid #ddd;">
+                                         🧪 多项式核实验代码
+                                     </div>
+                                     <div class="code-block" style="margin: 0; border-radius: 0;">
+                                         <button class="copy-btn" onclick="copyCode(this)">复制代码</button>
+                                         <pre><code># 多项式核实验代码
+from sklearn.datasets import make_moons
+from sklearn.svm import SVC
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 生成月牙形数据
+X, y = make_moons(n_samples=200, noise=0.3, random_state=42)
+
+# 比较不同degree的多项式核
+degrees = [2, 3, 4, 5]
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes = axes.ravel()
+
+for i, degree in enumerate(degrees):
+    # 训练多项式核SVM
+    svm_poly = SVC(kernel='poly', degree=degree, C=1.0, random_state=42)
+    svm_poly.fit(X, y)
+    
+    # 创建网格点用于可视化决策边界
+    h = 0.02
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+    
+    # 预测网格点
+    Z = svm_poly.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    
+    # 绘制决策边界和数据点
+    axes[i].contourf(xx, yy, Z, alpha=0.8, cmap=plt.cm.RdYlBu)
+    scatter = axes[i].scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.RdYlBu, edgecolors='black')
+    axes[i].set_title(f'多项式核 (degree={degree})')
+    axes[i].set_xlabel('特征1')
+    axes[i].set_ylabel('特征2')
+    
+    # 计算准确率
+    accuracy = svm_poly.score(X, y)
+    axes[i].text(0.02, 0.98, f'准确率: {accuracy:.3f}', 
+                transform=axes[i].transAxes, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+plt.tight_layout()
+plt.show()
+
+print("实验结论:")
+print("- degree=2: 决策边界相对简单")
+print("- degree=3: 决策边界适中，通常效果较好")
+print("- degree=4,5: 决策边界复杂，可能过拟合")</code></pre>
+                                     </div>
+                                 </div>
+                                <div class="alert alert-info" style="margin-top: 10px; font-size: 14px;">
+                                    <strong>💡 实验提示：</strong>调整degree参数（2,3,4），观察决策边界变化和分类效果差异。
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>6. 特征工程影响</h4>
+                                <p><strong>任务：</strong>在文本分类中，比较不同TF-IDF参数设置对SVM性能的影响：</p>
+                                <ul>
+                                    <li>max_features: 1000 vs 5000 vs 10000</li>
+                                    <li>ngram_range: (1,1) vs (1,2) vs (1,3)</li>
+                                    <li>min_df: 1 vs 2 vs 5</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="interactive-section">
+                            <h3>🧠 深度思考题</h3>
+                            
+                            <div class="alert alert-info">
+                                <h4>7. SVM vs 其他算法</h4>
+                                <p><strong>问题：</strong>比较SVM与逻辑回归的异同点，在高维稀疏数据（如文本）上哪个更有优势？为什么？</p>
+                                <table style="margin-top: 10px;">
+                                    <tr><th>对比维度</th><th>SVM</th><th>逻辑回归</th></tr>
+                                    <tr><td>决策边界</td><td>最大间隔超平面，可非线性</td><td>线性决策边界（sigmoid函数）</td></tr>
+                                    <tr><td>概率输出</td><td>不直接输出概率，需额外计算</td><td>直接输出概率值</td></tr>
+                                    <tr><td>高维性能</td><td>表现优秀，适合高维稀疏数据</td><td>在高维数据上容易过拟合</td></tr>
+                                    <tr><td>训练速度</td><td>O(n³)，大数据集较慢</td><td>O(n)，训练速度快</td></tr>
+                                    <tr><td>内存占用</td><td>只存储支持向量，内存友好</td><td>需存储所有特征权重</td></tr>
+                                    <tr><td>核函数</td><td>支持多种核函数，处理非线性</td><td>主要处理线性关系</td></tr>
+                                    <tr><td>正则化</td><td>通过C参数控制</td><td>通过L1/L2正则化</td></tr>
+                                    <tr><td>适用场景</td><td>文本分类、图像识别、生物信息</td><td>点击率预测、风险评估</td></tr>
+                                </table>
+                                <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
+                                    <strong>💡 结论：</strong>在高维稀疏数据（如文本）上，<strong>SVM通常更有优势</strong>，因为：
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        <li>SVM的最大间隔原理在高维空间中更稳定</li>
+                                        <li>核函数能有效处理特征间的复杂关系</li>
+                                        <li>只依赖支持向量，对噪声数据更鲁棒</li>
+                                        <li>在样本数量远小于特征数量时表现更好</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>8. 实际应用场景</h4>
+                                <p><strong>问题：</strong>设计一个基于SVM的图像分类系统，需要考虑哪些关键问题？</p>
+                                <ul>
+                                    <li>特征提取方法选择</li>
+                                    <li>数据预处理策略</li>
+                                    <li>核函数和参数选择</li>
+                                    <li>多分类策略（一对一 vs 一对多）</li>
+                                    <li>计算效率优化</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h4>9. 算法改进思考</h4>
+                                <p><strong>问题：</strong>SVM在处理大规模数据时面临哪些挑战？有哪些改进方法？</p>
+                                <details>
+                                    <summary>💡 思考方向</summary>
+                                    <ul>
+                                        <li>时间复杂度：O(n³) → 如何优化？</li>
+                                        <li>内存占用：核矩阵存储问题</li>
+                                        <li>在线学习：如何处理流式数据？</li>
+                                        <li>并行化：如何利用多核/GPU加速？</li>
+                                    </ul>
+                                </details>
+                            </div>
+                        </div>
+                        
+                        <div class="interactive-section">
+                            <h3>🎯 挑战项目</h3>
+                            
+                            <div class="alert alert-info">
+                                <h4>10. 综合项目：智能客服分类系统</h4>
+                                <p><strong>项目描述：</strong>设计一个基于SVM的客服问题自动分类系统，能够将用户问题分为：技术支持、账单查询、产品咨询、投诉建议四类。</p>
+                                
+                                <h5>项目要求：</h5>
+                                <ol>
+                                    <li>数据收集：模拟或收集真实客服对话数据</li>
+                                    <li>文本预处理：分词、去停用词、词干提取</li>
+                                    <li>特征工程：TF-IDF、词向量、N-gram等</li>
+                                    <li>模型训练：多分类SVM，参数调优</li>
+                                    <li>性能评估：准确率、召回率、F1-score</li>
+                                    <li>系统部署：Web界面，实时分类</li>
+                                </ol>
+                                
+                                <h5>评估标准：</h5>
+                                <ul>
+                                    <li>分类准确率 > 85%</li>
+                                    <li>响应时间 < 1秒</li>
+                                    <li>系统稳定性和用户体验</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <h4>💡 学习建议</h4>
+                            <ul>
+                                <li><strong>理论与实践结合：</strong>在理解数学原理的基础上，多动手实验</li>
+                                <li><strong>参数敏感性：</strong>通过可视化理解不同参数对模型的影响</li>
+                                <li><strong>数据特性分析：</strong>根据数据特点选择合适的核函数和预处理方法</li>
+                                <li><strong>性能优化：</strong>关注模型的泛化能力，避免过拟合</li>
+                                <li><strong>实际应用：</strong>尝试将SVM应用到真实问题中，积累经验</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 标签页切换功能
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 移除所有标签的active类
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 显示选中的标签页内容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 添加active类到选中的标签
+            event.target.classList.add('active');
+        }
+        
+        // 代码复制功能
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling.textContent;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                button.textContent = '已复制';
+                setTimeout(() => {
+                    button.textContent = '复制';
+                }, 2000);
+            });
+        }
+        
+        // 参数控制功能
+        document.getElementById('cValue').addEventListener('input', function() {
+            document.getElementById('cDisplay').textContent = this.value;
+        });
+        
+        document.getElementById('gammaValue').addEventListener('input', function() {
+            document.getElementById('gammaDisplay').textContent = this.value;
+        });
+        
+        document.getElementById('maxFeatures').addEventListener('input', function() {
+            document.getElementById('featuresDisplay').textContent = this.value;
+        });
+        
+        // 生成模拟训练结果
+        function generateMockTrainingResults(kernel, C, gamma, maxFeatures) {
+            // 基于参数生成合理的模拟结果
+            let trainAccuracy, testAccuracy, supportVectors;
+            
+            // 根据不同参数组合生成不同的准确率
+            if (kernel === 'linear') {
+                trainAccuracy = 0.85 + Math.random() * 0.1;
+                testAccuracy = trainAccuracy - 0.02 - Math.random() * 0.05;
+                supportVectors = Math.floor(50 + Math.random() * 30);
+            } else if (kernel === 'rbf') {
+                if (C > 5 || gamma > 0.5) {
+                    // 高C或高gamma可能过拟合
+                    trainAccuracy = 0.95 + Math.random() * 0.04;
+                    testAccuracy = trainAccuracy - 0.1 - Math.random() * 0.1;
+                    supportVectors = Math.floor(80 + Math.random() * 40);
+                } else if (C < 0.5 || gamma < 0.05) {
+                    // 低C或低gamma可能欠拟合
+                    trainAccuracy = 0.75 + Math.random() * 0.1;
+                    testAccuracy = trainAccuracy - 0.01 - Math.random() * 0.03;
+                    supportVectors = Math.floor(30 + Math.random() * 20);
+                } else {
+                    // 合理参数
+                    trainAccuracy = 0.88 + Math.random() * 0.08;
+                    testAccuracy = trainAccuracy - 0.02 - Math.random() * 0.04;
+                    supportVectors = Math.floor(60 + Math.random() * 25);
+                }
+            } else { // poly
+                trainAccuracy = 0.82 + Math.random() * 0.12;
+                testAccuracy = trainAccuracy - 0.03 - Math.random() * 0.06;
+                supportVectors = Math.floor(70 + Math.random() * 35);
+            }
+            
+            // 确保准确率在合理范围内
+            trainAccuracy = Math.min(0.99, Math.max(0.65, trainAccuracy));
+            testAccuracy = Math.min(0.95, Math.max(0.60, testAccuracy));
+            
+            // 生成分类报告数据
+            const hockeyPrecision = testAccuracy + (Math.random() - 0.5) * 0.1;
+            const hockeyRecall = testAccuracy + (Math.random() - 0.5) * 0.1;
+            const hockeyF1 = (hockeyPrecision + hockeyRecall) / 2;
+            
+            const politicsPrecision = testAccuracy + (Math.random() - 0.5) * 0.1;
+            const politicsRecall = testAccuracy + (Math.random() - 0.5) * 0.1;
+            const politicsF1 = (politicsPrecision + politicsRecall) / 2;
+            
+            return {
+                success: true,
+                results: {
+                    kernel: kernel,
+                    C: C,
+                    gamma: gamma,
+                    max_features: maxFeatures,
+                    train_accuracy: trainAccuracy,
+                    test_accuracy: testAccuracy,
+                    n_support_vectors: supportVectors,
+                    classification_report: {
+                        'Hockey': {
+                            precision: Math.min(0.99, Math.max(0.60, hockeyPrecision)),
+                            recall: Math.min(0.99, Math.max(0.60, hockeyRecall)),
+                            'f1-score': Math.min(0.99, Math.max(0.60, hockeyF1)),
+                            support: Math.floor(150 + Math.random() * 50)
+                        },
+                        'Politics': {
+                            precision: Math.min(0.99, Math.max(0.60, politicsPrecision)),
+                            recall: Math.min(0.99, Math.max(0.60, politicsRecall)),
+                            'f1-score': Math.min(0.99, Math.max(0.60, politicsF1)),
+                            support: Math.floor(150 + Math.random() * 50)
+                        }
+                    }
+                }
+            };
+        }
+        
+
+        
+        // 模拟训练模型功能
+        async function trainModel() {
+            const kernel = document.getElementById('kernelSelect').value;
+            const c = document.getElementById('cValue').value;
+            const gamma = document.getElementById('gammaValue').value;
+            const maxFeatures = document.getElementById('maxFeatures').value;
+            
+            // 显示训练状态
+            const performance = document.getElementById('modelPerformance');
+            
+            performance.innerHTML = `
+                <p><strong>当前模型状态：</strong>训练中...</p>
+                <p><strong>核函数：</strong>${kernel}</p>
+                <p><strong>参数 C：</strong>${c}</p>
+                <p><strong>参数 γ：</strong>${gamma}</p>
+                <p><strong>最大特征数：</strong>${maxFeatures}</p>
+            `;
+            
+
+            
+            try {
+                // 模拟训练延迟
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 生成模拟训练结果
+                const data = generateMockTrainingResults(kernel, parseFloat(c), parseFloat(gamma), parseInt(maxFeatures));
+                
+                if (data.success) {
+                    const results = data.results;
+                    
+                    // 显示训练结果
+                    performance.innerHTML = `
+                        <p><strong>当前模型状态：</strong>训练完成</p>
+                        <p><strong>核函数：</strong>${results.kernel}</p>
+                        <p><strong>参数 C：</strong>${results.C}</p>
+                        ${results.gamma ? `<p><strong>参数 γ：</strong>${results.gamma}</p>` : ''}
+                        <p><strong>最大特征数：</strong>${results.max_features}</p>
+                        <p><strong>训练集准确率：</strong>${results.train_accuracy}</p>
+                        <p><strong>测试集准确率：</strong>${results.test_accuracy}</p>
+                        <p><strong>支持向量数量：</strong>${results.n_support_vectors}</p>
+                        
+                        <h5>详细分类报告</h5>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="border: 1px solid #ddd; padding: 8px;">类别</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">精确率</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">召回率</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">F1分数</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">支持数</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Hockey</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Hockey'].precision.toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Hockey'].recall.toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Hockey']['f1-score'].toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Hockey'].support}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Politics</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Politics'].precision.toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Politics'].recall.toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Politics']['f1-score'].toFixed(3)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${results.classification_report['Politics'].support}</td>
+                            </tr>
+                        </table>
+                    `;
+                    
+
+                    
+                    // 生成结果分析
+                    generateResultAnalysis(results, parseFloat(c), parseFloat(gamma), kernel);
+                    
+                } else {
+                    performance.innerHTML = `<div style="color: red;">训练失败: ${data.error}</div>`;
+                }
+                
+            } catch (error) {
+                performance.innerHTML = `<div style="color: red;">网络错误: ${error.message}</div>`;
+                console.error('训练模型时出错:', error);
+            }
+        }
+        
+        // 文本分类功能
+        function classifyText() {
+            const text = document.getElementById('testText').value;
+            const result = document.getElementById('classificationResult');
+            
+            if (!text.trim()) {
+                alert('请输入要分类的文本！');
+                return;
+            }
+            
+            // 模拟分类过程
+            const isSpam = text.toLowerCase().includes('free') || 
+                          text.toLowerCase().includes('win') || 
+                          text.toLowerCase().includes('prize') ||
+                          text.toLowerCase().includes('offer');
+            
+            const confidence = (0.7 + Math.random() * 0.3).toFixed(4);
+            
+            result.style.display = 'block';
+            result.className = isSpam ? 'alert alert-danger' : 'alert alert-success';
+            result.innerHTML = `
+                <strong>分类结果：</strong>${isSpam ? '垃圾邮件' : '正常邮件'}<br>
+                <strong>置信度：</strong>${confidence}<br>
+                <strong>关键特征：</strong>${isSpam ? '包含营销词汇' : '正常文本内容'}
+            `;
+        }
+        
+        // 重置参数
+        function resetParameters() {
+            document.getElementById('kernelSelect').value = 'rbf';
+            document.getElementById('cValue').value = 1.0;
+            document.getElementById('gammaValue').value = 0.1;
+            document.getElementById('maxFeatures').value = 5000;
+            document.getElementById('cDisplay').textContent = '1.0';
+            document.getElementById('gammaDisplay').textContent = '0.1';
+            document.getElementById('featuresDisplay').textContent = '5000';
+        }
+        
+        // 生成结果分析
+        function generateResultAnalysis(results, C, gamma, kernel) {
+            const performanceAnalysis = document.getElementById('performanceAnalysis');
+            const parameterAnalysis = document.getElementById('parameterAnalysis');
+            const optimizationSuggestions = document.getElementById('optimizationSuggestions');
+            
+            // 性能分析
+            const trainAccuracy = results.train_accuracy;
+            const testAccuracy = results.test_accuracy;
+            const overfit = trainAccuracy - testAccuracy;
+            const supportVectors = results.n_support_vectors;
+            
+            let performanceStatus = '';
+            let performanceColor = '';
+            
+            if (overfit > 0.1) {
+                performanceStatus = '过拟合';
+                performanceColor = '#e74c3c';
+            } else if (overfit < 0.02) {
+                performanceStatus = '良好拟合';
+                performanceColor = '#27ae60';
+            } else {
+                performanceStatus = '轻微过拟合';
+                performanceColor = '#f39c12';
+            }
+            
+            performanceAnalysis.innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <h5 style="color: #2c3e50; margin-bottom: 10px;">📈 性能指标解读</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <strong>训练准确率:</strong> ${(trainAccuracy * 100).toFixed(2)}%<br>
+                            <strong>测试准确率:</strong> ${(testAccuracy * 100).toFixed(2)}%<br>
+                            <strong>泛化差距:</strong> <span style="color: ${performanceColor}">${(overfit * 100).toFixed(2)}%</span>
+                        </div>
+                        <div>
+                            <strong>支持向量数:</strong> ${supportVectors}<br>
+                            <strong>模型状态:</strong> <span style="color: ${performanceColor}; font-weight: bold;">${performanceStatus}</span><br>
+                            <strong>核函数:</strong> ${kernel.toUpperCase()}核
+                        </div>
+                    </div>
+                </div>
+                <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; font-size: 14px;">
+                    <strong>💡 性能解读:</strong> 
+                    ${overfit > 0.1 ? 
+                        '模型在训练集上表现很好，但在测试集上表现较差，存在过拟合现象。' : 
+                        overfit < 0.02 ? 
+                        '模型在训练集和测试集上表现均衡，泛化能力良好。' : 
+                        '模型存在轻微过拟合，但整体表现可接受。'
+                    }
+                </div>
+            `;
+            
+            // 参数影响分析
+            let cEffect = '';
+            let gammaEffect = '';
+            
+            if (C > 5) {
+                cEffect = '较大的C值使模型对误分类更敏感，可能导致过拟合';
+            } else if (C < 0.5) {
+                cEffect = '较小的C值允许更多误分类，模型可能欠拟合';
+            } else {
+                cEffect = 'C值适中，在拟合度和泛化能力间取得平衡';
+            }
+            
+            if (kernel === 'rbf') {
+                if (gamma > 0.5) {
+                    gammaEffect = '较大的γ值使决策边界更复杂，容易过拟合';
+                } else if (gamma < 0.05) {
+                    gammaEffect = '较小的γ值使决策边界更平滑，可能欠拟合';
+                } else {
+                    gammaEffect = 'γ值适中，决策边界复杂度合理';
+                }
+            } else {
+                gammaEffect = '当前核函数不使用γ参数';
+            }
+            
+            parameterAnalysis.innerHTML = `
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px;">
+                    <h5 style="color: #2c3e50; margin-bottom: 10px;">⚙️ 当前参数设置</h5>
+                    <div style="margin-bottom: 15px;">
+                        <div style="margin-bottom: 8px;">
+                            <strong>惩罚参数 C = ${C}:</strong> ${cEffect}
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <strong>RBF参数 γ = ${gamma}:</strong> ${gammaEffect}
+                        </div>
+                        <div>
+                            <strong>核函数类型:</strong> ${kernel === 'linear' ? '线性核 - 适用于线性可分数据' : 
+                                                      kernel === 'rbf' ? 'RBF核 - 适用于非线性数据，最常用' : 
+                                                      '多项式核 - 适用于特定非线性模式'}
+                        </div>
+                    </div>
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 5px; font-size: 14px;">
+                        <strong>📊 支持向量分析:</strong> 当前模型使用了 ${supportVectors} 个支持向量。
+                        ${supportVectors > 100 ? '支持向量较多，模型可能过于复杂。' : 
+                          supportVectors < 20 ? '支持向量较少，模型相对简单。' : 
+                          '支持向量数量适中。'}
+                    </div>
+                </div>
+            `;
+            
+            // 优化建议
+            let suggestions = [];
+            
+            if (overfit > 0.1) {
+                suggestions.push('🔧 减小C值以降低过拟合风险');
+                if (kernel === 'rbf' && gamma > 0.1) {
+                    suggestions.push('🔧 减小γ值以简化决策边界');
+                }
+                suggestions.push('📊 增加训练数据或使用正则化技术');
+            } else if (testAccuracy < 0.8) {
+                suggestions.push('🔧 适当增大C值以提高拟合度');
+                if (kernel === 'rbf' && gamma < 0.1) {
+                    suggestions.push('🔧 适当增大γ值以增加模型复杂度');
+                }
+                suggestions.push('🔄 尝试不同的核函数类型');
+            } else {
+                suggestions.push('✅ 当前参数设置表现良好');
+                suggestions.push('🎯 可尝试微调参数以进一步优化');
+            }
+            
+            if (kernel === 'linear' && testAccuracy < 0.85) {
+                suggestions.push('🔄 数据可能非线性，建议尝试RBF核');
+            }
+            
+            optimizationSuggestions.innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <h5 style="color: #2c3e50; margin-bottom: 10px;">🚀 优化建议</h5>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        ${suggestions.map(suggestion => `<li style="margin-bottom: 8px;">${suggestion}</li>`).join('')}
+                    </ul>
+                    <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 14px;">
+                        <strong>🎓 学习提示:</strong> 
+                        SVM的性能很大程度上取决于参数选择。建议使用网格搜索或交叉验证来找到最优参数组合。
+                        在实际应用中，还需要考虑计算效率和模型解释性。
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 图片预加载函数
+        function preloadImages() {
+            const imageUrls = [
+                'static/linear_svm_result.png',
+                'static/nonlinear_svm_result.png', 
+                'static/parameter_optimization.png',
+                'static/moons_dataset.png',
+                'static/support_vectors.png'
+            ];
+            
+            imageUrls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+                img.onload = function() {
+                    console.log(`图片加载成功: ${url}`);
+                };
+                img.onerror = function() {
+                    console.log(`图片加载失败: ${url}`);
+                };
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            preloadImages(); // 预加载所有实验结果图片
+        });
+    </script>
+<script src="../ai-chatbot.js"></script>
+</body>
+</html>

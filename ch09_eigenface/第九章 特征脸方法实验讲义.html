@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特征脸方法实验教学网页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            margin: 0 5px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-tab:hover {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .content-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .subsection {
+            margin-bottom: 30px;
+        }
+
+        .subsection h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .math-formula {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+            font-family: 'Times New Roman', serif;
+            text-align: center;
+        }
+
+        .code-container {
+            background: #2d3748;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-header {
+            background: #4a5568;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .download-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .code-content {
+            padding: 20px;
+            color: #e2e8f0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .result-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .demo-output {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            text-align: left;
+            min-height: 100px;
+            backdrop-filter: blur(5px);
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .performance-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 500;
+        }
+
+        .performance-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #1976d2;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-color: #ff9800;
+            color: #f57c00;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                margin: 5px 0;
+            }
+            
+            .demo-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页按钮 -->
+    <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    ">
+        <a href="../index.html" style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        " onmouseover="this.style.background='white'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='scale(1)'">
+            <span style="font-size: 18px;">←</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎭 特征脸方法实验教学</h1>
+            <p>基于主成分分析(PCA)的人脸识别技术深度解析</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('theory')">📚 理论基础</button>
+            <button class="nav-tab" onclick="showSection('implementation')">💻 代码实现</button>
+            <button class="nav-tab" onclick="showSection('results')">📊 实验结果</button>
+            <button class="nav-tab" onclick="showSection('thinking')">🤔 思考题</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 交互演示</button>
+        </div>
+
+        <!-- 理论基础部分 -->
+        <div id="theory" class="content-section active">
+            <h2 class="section-title">📚 特征脸方法理论基础</h2>
+            
+            <div class="subsection">
+                <h3>🎯 背景与原理概述</h3>
+                <p>特征脸（Eigenface）是基于<span class="highlight">主成分分析（PCA）</span>的经典人脸识别方法，由Turk和Pentland于1991年提出。其核心思想是将高维人脸图像数据通过<strong>降维</strong>映射到低维特征空间，提取最能表征人脸差异的"主成分"（即特征脸），从而实现高效的人脸识别与图像重建。</p>
+            </div>
+
+            <div class="subsection">
+                <h3>🔬 数学原理：主成分分析（PCA）</h3>
+                
+                <h4>📐 高维数据降维动机</h4>
+                <p>一张50×50的人脸图像可视为2500维向量（ℝ²⁵⁰⁰），直接处理易受"维数灾难"影响。PCA通过<strong>线性变换</strong>将高维数据投影到低维子空间，保留数据的主要方差（信息），同时降低计算复杂度。</p>
+                
+                <h4>⚙️ 核心步骤</h4>
+                <div class="alert alert-info">
+                    <strong>步骤1：数据中心化</strong><br>
+                    计算所有样本的平均向量（平均脸），将每个样本减去平均脸，得到差异矩阵：
+                </div>
+                <div class="math-formula">
+                    <strong>X = [x₁ - x̄, x₂ - x̄, ..., xₙ - x̄] ∈ ℝᴰˣᴺ</strong><br>
+                    其中 D 为图像维度（如2500），N 为样本数，x̄ = (1/N)∑xᵢ 为平均脸
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>步骤2：协方差矩阵计算</strong><br>
+                    差异矩阵的协方差矩阵为：
+                </div>
+                <div class="math-formula">
+                    <strong>C = (1/(N-1)) X Xᵀ ∈ ℝᴰˣᴰ</strong>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>步骤3：特征值分解</strong><br>
+                    对协方差矩阵进行特征值分解，得到特征值和特征向量（特征脸）
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>步骤4：主成分选择</strong><br>
+                    选取前K个最大特征值对应的特征向量，构成特征脸空间
+                </div>
+                <div class="math-formula">
+                    <strong>yᵢ = Uᵀ(xᵢ - x̄) ∈ ℝᴷ</strong><br>
+                    其中 U = [u₁, ..., uₖ] ∈ ℝᴰˣᴷ
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🎨 特征脸的物理意义</h3>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>平均脸</strong>：所有样本的灰度值平均，反映人脸的"共性"结构（如五官位置）</li>
+                    <li><strong>特征脸</strong>：偏离平均脸的主要模式。例如，第1个特征脸可能对应"光照变化"，第2个对应"表情变化"</li>
+                    <li><strong>低维投影</strong>：将人脸图像表示为特征脸的线性组合，实现数据压缩与特征提取</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 代码实现部分 -->
+        <div id="implementation" class="content-section">
+            <h2 class="section-title">💻 Python代码实现</h2>
+            
+            <div class="subsection">
+                <h3>🛠️ 环境配置与数据集</h3>
+                <div class="alert alert-warning">
+                    <strong>环境要求：</strong> Python 3.x，依赖库：numpy、matplotlib、PIL、opencv-python<br>
+                    <strong>数据集：</strong> YaleB人脸数据集，包含10名志愿者的640张正脸图像
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📖 核心算法实现</h3>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🔧 图像数据读取函数</span>
+                        <button class="download-btn" onclick="downloadCode('get_images')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def get_images(path):
+    """读取文件夹中的人脸图像，返回展平后的图像矩阵和标签"""
+    # 获取所有图像路径
+    image_paths = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('png')]
+    
+    # 读取第一张图片获取尺寸
+    first_img = Image.open(image_paths[0]).convert('L')
+    img_size = first_img.size[0] * first_img.size[1]
+    
+    # 初始化图像矩阵（行数=图像维度，列数=样本数）
+    images = np.zeros((len(image_paths), img_size))
+    labels = []
+    
+    for idx, img_path in enumerate(image_paths):
+        # 读取图像并转为灰度图
+        img = Image.open(img_path).convert('L')  # 填空1：补充图像读取模式
+        img_array = np.array(img, 'uint8')
+        # 展平为1维向量并存入矩阵
+        img_flat = img_array.flatten()  # 填空2：补充展平操作
+        images[idx, :] = img_flat
+        # 提取标签
+        filename = os.path.basename(img_path)
+        label = filename.split('_')[0][-2:]  # 填空3：补充标签提取逻辑
+        labels.append(label)
+    
+    return images.T, labels  # 返回形状为(D, N)的图像矩阵和标签列表</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🧠 特征脸训练函数</span>
+                        <button class="download-btn" onclick="downloadCode('eigen_train')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def eigen_train(trainset, K=10):
+    """训练特征脸模型，返回top-K特征脸、平均脸、训练样本投影"""
+    # 计算平均脸
+    avg_img = np.mean(trainset, axis=1, keepdims=True)  # 填空4：补充平均脸计算
+    # 计算差异矩阵（每个样本减去平均脸）
+    diff = trainset - avg_img  # 填空5：补充差异矩阵计算
+    # 计算协方差矩阵的特征值与特征向量
+    cov_matrix = (diff.T @ diff) / float(diff.shape[1])  # 填空6：补充协方差矩阵计算
+    eig_vals, eig_vects = np.linalg.eig(cov_matrix)  # 特征值分解
+    
+    # 按特征值降序排序，取前K个特征向量
+    sorted_idx = np.argsort(eig_vals)[::-1]  # 填空7：补充排序索引（降序）
+    top_eig_vects = eig_vects[:, sorted_idx[:K]]
+    
+    # 计算特征脸（差异矩阵×特征向量）
+    eigenfaces = diff @ top_eig_vects  # 填空8：补充特征脸计算
+    
+    # 特征脸归一化
+    for i in range(eigenfaces.shape[1]):
+        eigenfaces[:, i] = eigenfaces[:, i] / np.linalg.norm(eigenfaces[:, i])
+    
+    # 训练样本投影到特征脸空间
+    trainset_proj = eigenfaces.T @ diff  # 填空9：补充投影计算
+    
+    return eigenfaces, avg_img, trainset_proj, eig_vals[sorted_idx[:K]]</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🎯 人脸识别测试函数</span>
+                        <button class="download-btn" onclick="downloadCode('eigen_test')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def eigen_test(trainset_proj, avg_img, eigenfaces, trainset_labels, testset):
+    """测试特征脸模型，返回预测标签"""
+    # 测试样本减去平均脸
+    diff_test = testset - avg_img
+    # 投影到特征脸空间
+    testset_proj = eigenfaces.T @ diff_test  # 填空10：补充测试样本投影
+    
+    pred_labels = []
+    for i in range(testset_proj.shape[1]):
+        # 计算与所有训练样本的欧氏距离
+        distances = np.linalg.norm(trainset_proj - testset_proj[:, i:i+1], axis=0)  # 填空11：补充距离计算
+        # 找最近邻
+        min_idx = np.argmin(distances)
+        pred_label = trainset_labels[min_idx]
+        pred_labels.append(pred_label)
+    
+    return pred_labels</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🚀 完整实验主函数</span>
+                        <button class="download-btn" onclick="downloadCode('main_experiment')">
+                            📥 下载完整代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code># 1. 加载数据
+trainset, trainset_labels = get_images('./yaleBfaces/subset0')  # 训练集：subset0
+testset, testset_labels = get_images('./yaleBfaces/subset1')    # 测试集：subset1
+
+# 2. 训练模型（提取前K个特征脸）
+K = 20
+eigenfaces, avg_img, trainset_proj, eigenvalues = eigen_train(trainset, K)
+
+# 3. 测试模型
+pred_labels = eigen_test(trainset_proj, avg_img, eigenfaces, trainset_labels, testset)
+
+# 4. 计算准确率
+correct = sum(p == t for p, t in zip(pred_labels, testset_labels))
+accuracy = correct / len(testset_labels)
+print(f"K={K}时，识别准确率：{accuracy:.2f}")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📝 代码填空题答案</h3>
+                <div class="alert alert-info">
+                    <ol style="margin-left: 20px; line-height: 2;">
+                        <li><code>'L'</code>（灰度图模式）</li>
+                        <li><code>img_array.flatten()</code>（将2D图像展平为1D向量）</li>
+                        <li><code>filename.split('_')[0][-2:]</code>（从文件名提取标签）</li>
+                        <li><code>np.mean(trainset, axis=1, keepdims=True)</code>（按列计算平均）</li>
+                        <li><code>trainset - avg_img</code>（每个样本减去平均脸）</li>
+                        <li><code>(diff.T @ diff) / float(diff.shape[1])</code>（协方差矩阵）</li>
+                        <li><code>np.argsort(eig_vals)[::-1]</code>（特征值降序排序）</li>
+                        <li><code>diff @ top_eig_vects</code>（计算特征脸）</li>
+                        <li><code>eigenfaces.T @ diff</code>（训练样本投影）</li>
+                        <li><code>eigenfaces.T @ diff_test</code>（测试样本投影）</li>
+                        <li><code>np.linalg.norm(trainset_proj - testset_proj[:, i:i+1], axis=0)</code>（欧氏距离）</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实验结果部分 -->
+        <div id="results" class="content-section">
+            <h2 class="section-title">📊 实验结果与分析</h2>
+            
+            <div class="subsection">
+                <h3>🎨 特征脸可视化结果</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <img src="eigenfaces_visualization.png" alt="特征脸可视化">
+                        <h4>平均脸与前9个特征脸</h4>
+                        <p>平均脸显示了所有训练样本的平均特征，前几个特征脸主要捕捉光照变化和整体亮度差异，后续特征脸体现更细微的个体差异。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📈 识别准确率与K值关系</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <img src="accuracy_vs_k.png" alt="准确率与K值关系">
+                        <h4>不同主成分数量的性能对比</h4>
+                        <p>实验结果表明K值从5增加到10时准确率显著提升，K>15后准确率趋于稳定，说明前15个主成分已包含了大部分有效信息。</p>
+                    </div>
+                </div>
+                
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>K值</th>
+                            <th>5</th>
+                            <th>10</th>
+                            <th>15</th>
+                            <th>20</th>
+                            <th>25</th>
+                            <th>30</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>准确率（subset1）</strong></td>
+                            <td>0.692</td>
+                            <td>0.933</td>
+                            <td>0.942</td>
+                            <td>0.942</td>
+                            <td>0.942</td>
+                            <td>0.942</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>🌟 图像重建质量分析</h3>
+                <div class="result-grid">
+
+                    <div class="result-card">
+                        <img src="detailed_reconstruction.png" alt="多张人脸重建对比">
+                        <h4>多张人脸的重建效果对比</h4>
+                        <p>展示了6张不同人脸在K=20时的重建效果，可以看出特征脸方法对不同个体都能较好地保持主要特征，但在细节表现上存在差异。</p>
+                    </div>
+                    <div class="result-card">
+                        <img src="reconstruction_quality_analysis.png" alt="重建质量分析">
+                        <h4>重建质量随K值变化分析</h4>
+                        <p>通过MSE（均方误差）量化重建质量，K值从1增加到50时，重建误差逐渐减小，图像细节逐步恢复，展现了主成分累积的效果。</p>
+                    </div>
+                    <div class="result-card">
+                        <img src="eigenface_contribution.png" alt="特征脸贡献分析">
+                        <h4>特征脸累积重建过程</h4>
+                        <p>逐步添加特征脸的重建过程：从平均脸开始，每增加一个特征脸，重建图像都更接近原图，直观展示了PCA降维重建的数学原理。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>💡 光照变化对性能的影响</h3>
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>子集</th>
+                            <th>subset1（弱阴影）</th>
+                            <th>subset2（中等阴影）</th>
+                            <th>subset3（强阴影）</th>
+                            <th>subset4（极端阴影）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>准确率</strong></td>
+                            <td>0.942</td>
+                            <td>0.500</td>
+                            <td>0.186</td>
+                            <td>0.142</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="alert alert-warning">
+                    <strong>结论：</strong>特征脸对光照变化非常敏感，随着阴影程度增强，识别准确率急剧下降。这是因为PCA主要捕捉全局亮度变化，而非局部纹理特征。
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🔍 与其他方法的性能对比</h3>
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>准确率</th>
+                            <th>推理时延(ms)</th>
+                            <th>训练数据需求</th>
+                            <th>主要优势</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>特征脸</strong></td>
+                            <td>85%</td>
+                            <td>2</td>
+                            <td>100+样本</td>
+                            <td>简单高效，适合大规模数据</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fisherfaces</strong></td>
+                            <td>93%</td>
+                            <td>5</td>
+                            <td>500+样本</td>
+                            <td>对光照更鲁棒</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LBPH</strong></td>
+                            <td>94%</td>
+                            <td>10</td>
+                            <td>1000+样本</td>
+                            <td>对光照、遮挡鲁棒</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CNN（ArcFace）</strong></td>
+                            <td>99.83%</td>
+                            <td>50</td>
+                            <td>100000+样本</td>
+                            <td>准确率极高，鲁棒性强</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 思考题部分 -->
+        <div id="thinking" class="content-section">
+            <h2 class="section-title">🤔 思考题与讨论</h2>
+            
+            <div class="subsection">
+                <h3>💡 基础理论思考</h3>
+                <div class="result-card">
+                    <h4>1. 为什么要计算平均脸？</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>平均脸在特征脸算法中的作用是什么？</li>
+                        <li>去中心化操作的数学意义是什么？</li>
+                        <li>如果不进行去中心化会有什么影响？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑协方差矩阵的计算和主成分分析的原理
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h4>2. 为什么使用 A^T·A 而不是 A·A^T？</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>两种协方差矩阵计算方式的维度差异</li>
+                        <li>计算复杂度的对比分析</li>
+                        <li>特征向量的转换关系</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑图像像素数量与样本数量的关系
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h4>3. K值选择对识别效果的影响</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>K值过小会导致什么问题？</li>
+                        <li>K值过大会导致什么问题？</li>
+                        <li>如何选择最优的K值？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>观察实验结果中的准确率变化曲线
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🔬 实验分析思考</h3>
+                <div class="result-card">
+                    <h4>4. 特征脸的物理意义</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>观察特征脸图像，它们代表什么？</li>
+                        <li>为什么有些特征脸看起来像"鬼脸"？</li>
+                        <li>不同特征脸捕获了人脸的哪些特征？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>特征脸是人脸变化的主要模式
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h4>5. 重建质量分析</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>为什么K=5时重建效果较差？</li>
+                        <li>K=50时重建效果如何？是否越大越好？</li>
+                        <li>重建误差的来源有哪些？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑信息保留与噪声的权衡
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h4>6. 识别准确率分析</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>为什么准确率先上升后下降？</li>
+                        <li>最优K值在什么范围内？</li>
+                        <li>如何改进识别算法的性能？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑有用信息与噪声的平衡点
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🚀 应用拓展思考</h3>
+                <div class="result-card">
+                    <h4>7. 算法局限性分析</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>特征脸算法对光照变化敏感吗？</li>
+                        <li>对姿态变化的鲁棒性如何？</li>
+                        <li>如何改进这些局限性？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑现代深度学习方法的优势
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h4>8. 实际应用考虑</h4>
+                    <p><strong>思考要点：</strong></p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>在考勤系统中，如何处理新员工入职？</li>
+                        <li>如何设置合适的识别阈值？</li>
+                        <li>如何处理误识别和拒识问题？</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>💡 提示：</strong>考虑系统的可扩展性和实用性
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>💬 讨论与总结</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>🎯 学习目标检查</h4>
+                        <ul style="margin-left: 20px; line-height: 1.8;">
+                            <li>✅ 理解特征脸算法的数学原理</li>
+                            <li>✅ 掌握PCA在人脸识别中的应用</li>
+                            <li>✅ 分析K值对算法性能的影响</li>
+                            <li>✅ 了解算法的优势与局限性</li>
+                            <li>✅ 思考实际应用中的工程问题</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>🔍 进一步探索</h4>
+                        <ul style="margin-left: 20px; line-height: 1.8;">
+                            <li>研究其他降维算法（LDA、ICA等）</li>
+                            <li>了解现代人脸识别技术（CNN、Transformer等）</li>
+                            <li>探索人脸识别的伦理和隐私问题</li>
+                            <li>实现更复杂的人脸识别系统</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交互演示部分 -->
+        <div id="interactive" class="content-section">
+            <h2 class="section-title">🎮 交互式考勤系统演示</h2>
+            
+            <div class="interactive-demo">
+                <h3>🏢 基于特征脸的人脸识别考勤系统</h3>
+                <p>本系统展示了特征脸算法在实际应用中的使用场景。系统包含数据采集、模型训练、实时识别和考勤记录四个核心功能模块。</p>
+                
+                <div class="subsection">
+                    <h4>🏗️ 系统架构</h4>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <p><strong>1. 数据采集模块：</strong>录入学生人脸图像（存于dataset/文件夹）</p>
+                        <p><strong>2. 模型训练模块：</strong>离线训练特征脸模型，保存特征脸与平均脸</p>
+                        <p><strong>3. 考勤识别模块：</strong>实时采集人脸，与模型匹配，记录出勤状态</p>
+                        <p><strong>4. 数据管理模块：</strong>考勤记录的存储、查询和统计分析</p>
+                    </div>
+                </div>
+
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="simulateDataCollection()">📷 模拟数据采集</button>
+                    <button class="demo-btn" onclick="simulateTraining()">🧠 模拟模型训练</button>
+                    <button class="demo-btn" onclick="simulateRecognition()">🎯 模拟实时识别</button>
+                    <button class="demo-btn" onclick="showAttendanceRecord()">📋 查看考勤记录</button>
+                </div>
+                
+                <div id="demo-output" class="demo-output">
+                    <div style="color: #00ff88;">💡 系统就绪，请选择功能进行演示...</div>
+                    <div style="color: #88ccff; margin-top: 10px;">ℹ️ 提示：这是一个模拟演示，展示了考勤系统的工作流程和界面效果</div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>⚙️ 系统核心功能代码</h3>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>📷 人脸数据采集模块</span>
+                        <button class="download-btn" onclick="downloadCode('capture_face')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def capture_face(name, num_samples=5):
+    """调用摄像头采集人脸样本，保存至dataset/name/"""
+    dataset_path = f'dataset/{name}'
+    os.makedirs(dataset_path, exist_ok=True)
+    
+    cap = cv2.VideoCapture(0)  # 打开摄像头
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    count = 0
+    
+    print(f"开始采集 {name} 的人脸样本，需要 {num_samples} 张照片")
+    print("按空格键拍照，按q键退出")
+    
+    while count < num_samples:
+        ret, frame = cap.read()
+        if not ret:
+            break
+            
+        # 人脸检测
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        
+        # 绘制人脸框
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(frame, f'{name} - {count}/{num_samples}', (x, y-10), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        cv2.imshow('人脸采集', frame)
+        
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord(' ') and len(faces) > 0:  # 按空格键拍照
+            x, y, w, h = faces[0]
+            face_roi = cv2.resize(gray[y:y+h, x:x+w], (50, 50))
+            filename = f'{dataset_path}/{name}_{count:02d}.png'
+            cv2.imwrite(filename, face_roi)
+            print(f"已保存: {filename}")
+            count += 1
+        elif key == ord('q'):
+            break
+    
+    cap.release()
+    cv2.destroyAllWindows()</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🧠 特征脸模型训练模块</span>
+                        <button class="download-btn" onclick="downloadCode('eigen_train')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def eigen_train(trainset, K=10):
+    """训练特征脸模型，返回top-K特征脸、平均脸、训练样本投影"""
+    # 计算平均脸
+    avg_img = np.mean(trainset, axis=1, keepdims=True)
+    
+    # 计算差值矩阵（去中心化）
+    diff = trainset - avg_img
+    
+    # 计算协方差矩阵 C = A^T * A（降维技巧）
+    cov_matrix = (diff.T @ diff) / float(diff.shape[1])
+    
+    # 特征值分解
+    eig_vals, eig_vects = np.linalg.eig(cov_matrix)
+    
+    # 按特征值大小排序，选择前K个
+    sorted_idx = np.argsort(eig_vals)[::-1]
+    top_eig_vects = eig_vects[:, sorted_idx[:K]]
+    
+    # 计算真正的特征向量（特征脸）
+    eigenfaces = diff @ top_eig_vects
+    
+    # 归一化特征脸
+    for i in range(K):
+        eigenfaces[:, i] = eigenfaces[:, i] / np.linalg.norm(eigenfaces[:, i])
+    
+    # 计算训练样本在特征脸空间的投影
+    train_projections = eigenfaces.T @ diff
+    
+    return eigenfaces, avg_img, train_projections</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🎯 人脸识别测试模块</span>
+                        <button class="download-btn" onclick="downloadCode('eigen_test')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def eigen_test(testset, eigenfaces, avg_img, train_projections, train_labels):
+    """使用特征脸模型进行人脸识别测试"""
+    predictions = []
+    confidences = []
+    
+    for i in range(testset.shape[1]):
+        # 测试图像去中心化
+        test_img = testset[:, i:i+1] - avg_img
+        
+        # 投影到特征脸空间
+        test_projection = eigenfaces.T @ test_img
+        
+        # 计算与所有训练样本的欧氏距离
+        distances = []
+        for j in range(train_projections.shape[1]):
+            train_proj = train_projections[:, j:j+1]
+            dist = np.linalg.norm(test_projection - train_proj)
+            distances.append(dist)
+        
+        # 找到最近邻
+        min_idx = np.argmin(distances)
+        min_distance = distances[min_idx]
+        
+        # 预测标签和置信度（距离越小置信度越高）
+        pred_label = train_labels[min_idx]
+        confidence = 1.0 / (1.0 + min_distance)  # 简单的置信度计算
+        
+        predictions.append(pred_label)
+        confidences.append(confidence)
+    
+    return predictions, confidences</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>📊 考勤记录管理模块</span>
+                        <button class="download-btn" onclick="downloadCode('attendance_system')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def record_attendance(pred_label, confidence=0.0, attendance_file='attendance.csv'):
+    """记录考勤结果（姓名、时间、状态、置信度）"""
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # 检查文件是否存在，不存在则创建并写入表头
+    if not os.path.exists(attendance_file):
+        with open(attendance_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['姓名', '时间', '状态', '置信度'])
+    
+    # 读取今日已有记录，避免重复
+    today = datetime.now().strftime('%Y-%m-%d')
+    existing_records = []
+    
+    try:
+        with open(attendance_file, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            next(reader)  # 跳过表头
+            for row in reader:
+                if len(row) >= 2 and row[1].startswith(today):
+                    existing_records.append(row[0])
+    except FileNotFoundError:
+        pass
+    
+    # 记录考勤
+    if pred_label not in existing_records:
+        with open(attendance_file, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([pred_label, now, 'Present', f'{confidence:.3f}'])
+        print(f"考勤成功：{pred_label} {now} (置信度: {confidence:.3f})")
+        return True
+    else:
+        print(f"今日已考勤：{pred_label}")
+        return False</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>🔄 完整考勤系统主函数</span>
+                        <button class="download-btn" onclick="downloadCode('attendance_main')">
+                            📥 下载代码
+                        </button>
+                    </div>
+                    <div class="code-content">
+<pre><code>def attendance_system():
+    """基于特征脸的考勤系统主函数"""
+    print("=== 特征脸考勤系统 ===")
+    
+    # 检查训练数据
+    if not os.path.exists('dataset') or len(os.listdir('dataset')) == 0:
+        print("❌ 未找到训练数据，请先采集人脸样本")
+        return
+    
+    # 加载训练数据
+    print("📚 加载训练数据...")
+    train_images, train_labels = get_images('dataset')
+    
+    # 训练特征脸模型
+    print("🧠 训练特征脸模型...")
+    eigenfaces, avg_img, train_projections = eigen_train(train_images, K=20)
+    print(f"✅ 模型训练完成，使用 {eigenfaces.shape[1]} 个特征脸")
+    
+    # 启动实时识别
+    print("🎯 启动实时人脸识别...")
+    cap = cv2.VideoCapture(0)
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    
+    print("按 's' 键进行考勤识别，按 'c' 键采集新样本，按 'q' 键退出")
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(frame, 'Face Detected', (x, y-10), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        cv2.imshow('考勤系统', frame)
+        
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('s') and len(faces) > 0:  # 考勤识别
+            x, y, w, h = faces[0]
+            face_roi = cv2.resize(gray[y:y+h, x:x+w], (50, 50))
+            test_img = face_roi.flatten().reshape(-1, 1)
+            
+            # 进行识别
+            predictions, confidences = eigen_test(test_img, eigenfaces, avg_img, 
+                                                 train_projections, train_labels)
+            
+            if confidences[0] > 0.3:  # 置信度阈值
+                record_attendance(predictions[0], confidences[0])
+            else:
+                print("❌ 识别失败，置信度过低")
+                
+        elif key == ord('c'):  # 采集新样本
+            name = input("请输入姓名: ")
+            capture_face(name)
+            # 重新训练模型
+            train_images, train_labels = get_images('dataset')
+            eigenfaces, avg_img, train_projections = eigen_train(train_images, K=20)
+            print("✅ 模型已更新")
+            
+        elif key == ord('q'):
+            break
+    
+    cap.release()
+    cv2.destroyAllWindows()</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🎯 应用场景与优势</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>🏫 教育场景</h4>
+                        <p>课堂考勤、实验室门禁、图书馆管理</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>🏢 企业应用</h4>
+                        <p>员工打卡、会议签到、访客管理</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>🔒 安防监控</h4>
+                        <p>小区门禁、办公楼管理、重要区域监控</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>技术优势：</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>算法简单，计算效率高，适合实时应用</li>
+                        <li>对硬件要求低，可在普通PC上运行</li>
+                        <li>训练数据需求相对较少，易于部署</li>
+                        <li>可视化效果好，便于理解和调试</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🎓 特征脸方法实验教学网页 | 基于主成分分析的人脸识别技术</p>
+        <p>💡 通过理论学习、代码实践和交互演示，深入理解计算机视觉中的经典算法</p>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        function showSection(sectionId) {
+            // 隐藏所有内容区域
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有标签的active状态
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的内容区域
+            document.getElementById(sectionId).classList.add('active');
+            
+            // 添加选中标签的active状态
+            event.target.classList.add('active');
+        }
+
+        // 代码下载功能
+        function downloadCode(codeType) {
+            const codeMap = {
+                'get_images': `import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+import os
+
+def get_images(path):
+    """读取文件夹中的人脸图像，返回展平后的图像矩阵和标签"""
+    image_paths = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('png')]
+    first_img = Image.open(image_paths[0]).convert('L')
+    img_size = first_img.size[0] * first_img.size[1]
+    
+    images = np.zeros((len(image_paths), img_size))
+    labels = []
+    
+    for idx, img_path in enumerate(image_paths):
+        img = Image.open(img_path).convert('L')
+        img_array = np.array(img, 'uint8')
+        img_flat = img_array.flatten()
+        images[idx, :] = img_flat
+        filename = os.path.basename(img_path)
+        label = filename.split('_')[0][-2:]
+        labels.append(label)
+    
+    return images.T, labels`,
+                'eigen_train': `import numpy as np
+
+def eigen_train(trainset, K=10):
+    """训练特征脸模型，返回top-K特征脸、平均脸、训练样本投影"""
+    # 计算平均脸
+    avg_img = np.mean(trainset, axis=1, keepdims=True)
+    
+    # 计算差值矩阵（去中心化）
+    diff = trainset - avg_img
+    
+    # 计算协方差矩阵 C = A^T * A（降维技巧）
+    cov_matrix = (diff.T @ diff) / float(diff.shape[1])
+    
+    # 特征值分解
+    eig_vals, eig_vects = np.linalg.eig(cov_matrix)
+    
+    # 按特征值大小排序，选择前K个
+    sorted_idx = np.argsort(eig_vals)[::-1]
+    top_eig_vects = eig_vects[:, sorted_idx[:K]]
+    
+    # 计算真正的特征向量（特征脸）
+    eigenfaces = diff @ top_eig_vects
+    
+    # 归一化特征脸
+    for i in range(K):
+        eigenfaces[:, i] = eigenfaces[:, i] / np.linalg.norm(eigenfaces[:, i])
+    
+    # 计算训练样本在特征脸空间的投影
+    train_projections = eigenfaces.T @ diff
+    
+    return eigenfaces, avg_img, train_projections`,
+                'eigen_test': `import numpy as np
+
+def eigen_test(testset, eigenfaces, avg_img, train_projections, train_labels):
+    """使用特征脸模型进行人脸识别测试"""
+    predictions = []
+    confidences = []
+    
+    for i in range(testset.shape[1]):
+        # 测试图像去中心化
+        test_img = testset[:, i:i+1] - avg_img
+        
+        # 投影到特征脸空间
+        test_projection = eigenfaces.T @ test_img
+        
+        # 计算与所有训练样本的欧氏距离
+        distances = []
+        for j in range(train_projections.shape[1]):
+            train_proj = train_projections[:, j:j+1]
+            dist = np.linalg.norm(test_projection - train_proj)
+            distances.append(dist)
+        
+        # 找到最近邻
+        min_idx = np.argmin(distances)
+        min_distance = distances[min_idx]
+        
+        # 预测标签和置信度（距离越小置信度越高）
+        pred_label = train_labels[min_idx]
+        confidence = 1.0 / (1.0 + min_distance)  # 简单的置信度计算
+        
+        predictions.append(pred_label)
+        confidences.append(confidence)
+    
+    return predictions, confidences`,
+                'attendance_system': `import csv
+import os
+from datetime import datetime
+
+def record_attendance(pred_label, confidence=0.0, attendance_file='attendance.csv'):
+    """记录考勤结果（姓名、时间、状态、置信度）"""
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # 检查文件是否存在，不存在则创建并写入表头
+    if not os.path.exists(attendance_file):
+        with open(attendance_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['姓名', '时间', '状态', '置信度'])
+    
+    # 读取今日已有记录，避免重复
+    today = datetime.now().strftime('%Y-%m-%d')
+    existing_records = []
+    
+    try:
+        with open(attendance_file, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            next(reader)  # 跳过表头
+            for row in reader:
+                if len(row) >= 2 and row[1].startswith(today):
+                    existing_records.append(row[0])
+    except FileNotFoundError:
+        pass
+    
+    # 记录考勤
+    if pred_label not in existing_records:
+        with open(attendance_file, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([pred_label, now, 'Present', f'{confidence:.3f}'])
+        print(f"考勤成功：{pred_label} {now} (置信度: {confidence:.3f})")
+        return True
+    else:
+        print(f"今日已考勤：{pred_label}")
+        return False`,
+                'attendance_main': `import cv2
+import os
+import numpy as np
+from datetime import datetime
+
+def attendance_system():
+    """基于特征脸的考勤系统主函数"""
+    print("=== 特征脸考勤系统 ===")
+    
+    # 检查训练数据
+    if not os.path.exists('dataset') or len(os.listdir('dataset')) == 0:
+        print("❌ 未找到训练数据，请先采集人脸样本")
+        return
+    
+    # 加载训练数据
+    print("📚 加载训练数据...")
+    train_images, train_labels = get_images('dataset')
+    
+    # 训练特征脸模型
+    print("🧠 训练特征脸模型...")
+    eigenfaces, avg_img, train_projections = eigen_train(train_images, K=20)
+    print(f"✅ 模型训练完成，使用 {eigenfaces.shape[1]} 个特征脸")
+    
+    # 启动实时识别
+    print("🎯 启动实时人脸识别...")
+    cap = cv2.VideoCapture(0)
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    
+    print("按 's' 键进行考勤识别，按 'c' 键采集新样本，按 'q' 键退出")
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(frame, 'Face Detected', (x, y-10), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        cv2.imshow('考勤系统', frame)
+        
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('s') and len(faces) > 0:  # 考勤识别
+            x, y, w, h = faces[0]
+            face_roi = cv2.resize(gray[y:y+h, x:x+w], (50, 50))
+            test_img = face_roi.flatten().reshape(-1, 1)
+            
+            # 进行识别
+            predictions, confidences = eigen_test(test_img, eigenfaces, avg_img, 
+                                                 train_projections, train_labels)
+            
+            if confidences[0] > 0.3:  # 置信度阈值
+                record_attendance(predictions[0], confidences[0])
+            else:
+                print("❌ 识别失败，置信度过低")
+                
+        elif key == ord('c'):  # 采集新样本
+            name = input("请输入姓名: ")
+            capture_face(name)
+            # 重新训练模型
+            train_images, train_labels = get_images('dataset')
+            eigenfaces, avg_img, train_projections = eigen_train(train_images, K=20)
+            print("✅ 模型已更新")
+            
+        elif key == ord('q'):
+            break
+    
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    attendance_system()`
+            };
+            
+            const code = codeMap[codeType] || '# 代码内容';
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${codeType}.py`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // 显示下载提示
+            alert(`✅ ${codeType}.py 代码文件下载成功！`);
+        }
+
+        // 交互演示功能
+        function simulateDataCollection() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = `
+                <div style="color: #00ff88;">📷 正在启动摄像头...</div>
+                <div style="color: #ffaa00; margin-top: 5px;">🔍 检测到人脸，准备采集样本</div>
+                <div style="color: #88ccff; margin-top: 5px;">📸 已采集样本 1/5 - 张三</div>
+                <div style="color: #88ccff; margin-top: 5px;">📸 已采集样本 2/5 - 张三</div>
+                <div style="color: #88ccff; margin-top: 5px;">📸 已采集样本 3/5 - 张三</div>
+                <div style="color: #88ccff; margin-top: 5px;">📸 已采集样本 4/5 - 张三</div>
+                <div style="color: #88ccff; margin-top: 5px;">📸 已采集样本 5/5 - 张三</div>
+                <div style="color: #00ff88; margin-top: 10px;">✅ 数据采集完成！已保存至 dataset/张三/ 文件夹</div>
+            `;
+        }
+
+        function simulateTraining() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = `
+                <div style="color: #00ff88;">🧠 正在加载训练数据...</div>
+                <div style="color: #88ccff; margin-top: 5px;">📊 训练集: 150 张图片，10 个人</div>
+                <div style="color: #ffaa00; margin-top: 5px;">⚙️ 计算平均脸...</div>
+                <div style="color: #ffaa00; margin-top: 5px;">🔢 计算协方差矩阵...</div>
+                <div style="color: #ffaa00; margin-top: 5px;">📈 特征值分解中...</div>
+                <div style="color: #ffaa00; margin-top: 5px;">🎯 提取前20个主成分...</div>
+                <div style="color: #88ccff; margin-top: 5px;">📉 特征值: [2847.3, 1923.7, 1456.2, 1089.4, ...]</div>
+                <div style="color: #00ff88; margin-top: 10px;">✅ 模型训练完成！准确率: 94.2%</div>
+            `;
+        }
+
+        function simulateRecognition() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = `
+                <div style="color: #00ff88;">🎯 启动实时识别系统...</div>
+                <div style="color: #88ccff; margin-top: 5px;">📹 摄像头已就绪</div>
+                <div style="color: #ffaa00; margin-top: 5px;">🔍 检测到人脸...</div>
+                <div style="color: #88ccff; margin-top: 5px;">🧮 计算特征向量投影...</div>
+                <div style="color: #88ccff; margin-top: 5px;">📏 计算欧氏距离...</div>
+                <div style="color: #00ff88; margin-top: 5px;">✅ 识别成功: 张三 (置信度: 0.87)</div>
+                <div style="color: #00ff88; margin-top: 5px;">📝 考勤记录已更新</div>
+                <div style="color: #ffaa00; margin-top: 10px;">🔄 继续监控中...</div>
+            `;
+        }
+
+        function showAttendanceRecord() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = `
+                <div style="color: #00ff88;">📋 考勤记录查询</div>
+                <div style="color: #88ccff; margin-top: 10px;">==========================================</div>
+                <div style="color: #ffffff; margin-top: 5px;">姓名    |  时间           |  状态   |  置信度</div>
+                <div style="color: #88ccff; margin-top: 5px;">------------------------------------------</div>
+                <div style="color: #ffffff; margin-top: 5px;">张三    |  2024-01-15 08:30  |  Present  |  0.87</div>
+                <div style="color: #ffffff; margin-top: 5px;">李四    |  2024-01-15 08:32  |  Present  |  0.92</div>
+                <div style="color: #ffffff; margin-top: 5px;">王五    |  2024-01-15 08:35  |  Present  |  0.78</div>
+                <div style="color: #ffffff; margin-top: 5px;">赵六    |  2024-01-15 08:38  |  Present  |  0.85</div>
+                <div style="color: #88ccff; margin-top: 5px;">==========================================</div>
+                <div style="color: #00ff88; margin-top: 10px;">📊 今日出勤率: 4/10 (40%)</div>
+            `;
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎭 特征脸方法实验教学网页加载完成！');
+        });
+    </script>
+<script src="../ai-chatbot.js"></script>
+</body>
+</html>

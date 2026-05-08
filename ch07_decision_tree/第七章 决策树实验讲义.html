@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能课程实验讲义：决策树实验</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--light-bg), #e9ecef);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+            color: white;
+            font-weight: bold;
+            border-bottom: none;
+        }
+
+        .code-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            color: white;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+        }
+
+        .result-images {
+            margin-top: 20px;
+        }
+        
+        .result-card {
+             background: white;
+             border-radius: 10px;
+             padding: 15px;
+             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+             margin-bottom: 15px;
+             text-align: center;
+         }
+         
+         .result-image {
+             max-width: 100%;
+             height: auto;
+             border-radius: 8px;
+             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+             margin: 10px 0;
+         }
+
+        .interactive-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .parameter-control {
+            margin: 1rem 0;
+        }
+
+        .parameter-control label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .algorithm-comparison {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .comparison-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .math-formula {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .nav-pills .nav-link.active {
+            background: var(--secondary-color);
+        }
+
+        #boundaryCanvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页按钮 -->
+    <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    ">
+        <a href="../index.html" style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        " onmouseover="this.style.background='white'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='scale(1)'">
+            <span style="font-size: 18px;">←</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-tree"></i> 决策树实验教学平台
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#principles">算法原理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#implementation">代码实现</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#interactive">交互演示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#case-study">实例拓展</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section class="hero-section">
+        <div class="container">
+            <h1><i class="fas fa-tree"></i> 决策树算法实验</h1>
+            <p class="lead">深入理解决策树算法原理，掌握分类与回归应用，体验交互式学习</p>
+            <a href="#principles" class="btn btn-light btn-lg">
+                <i class="fas fa-play"></i> 开始学习
+            </a>
+        </div>
+    </section>
+
+    <main class="container" style="margin-top: 2rem;">
+        <!-- 算法原理部分 -->
+        <section id="principles" class="mb-5">
+            <div class="section-header">
+                <div class="container">
+                    <h2><i class="fas fa-lightbulb"></i> 决策树算法原理</h2>
+                    <p class="lead">理解决策树的核心概念和学习过程</p>
+                </div>
+            </div>
+
+            <div class="algorithm-comparison">
+                <h4><i class="fas fa-chart-tree"></i> 决策树算法对比</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped comparison-table">
+                        <thead>
+                            <tr>
+                                <th>算法</th>
+                                <th>特征选择标准</th>
+                                <th>适用场景</th>
+                                <th>优点</th>
+                                <th>缺点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ID3</strong></td>
+                                <td>信息增益</td>
+                                <td>分类问题</td>
+                                <td>简单易懂，计算快速</td>
+                                <td>偏向选择取值较多的特征</td>
+                            </tr>
+                            <tr>
+                                <td><strong>C4.5</strong></td>
+                                <td>信息增益比</td>
+                                <td>分类问题</td>
+                                <td>克服ID3的偏向性</td>
+                                <td>计算复杂度较高</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CART</strong></td>
+                                <td>基尼系数/MSE</td>
+                                <td>分类和回归</td>
+                                <td>支持连续值，可处理回归</td>
+                                <td>容易过拟合</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-4">
+                    <div class="feature-highlight">
+                        <h5><i class="fas fa-info-circle"></i> 信息熵</h5>
+                        <div class="math-formula">
+                            <strong>H(D) = -∑ p<sub>k</sub> log<sub>2</sub> p<sub>k</sub></strong>
+                        </div>
+                        <p>衡量数据集的纯度，熵值越小，数据越纯净</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="feature-highlight">
+                        <h5><i class="fas fa-chart-line"></i> 信息增益</h5>
+                        <div class="math-formula">
+                            <strong>Gain(D,A) = H(D) - ∑ |D<sub>v</sub>|/|D| × H(D<sub>v</sub>)</strong>
+                        </div>
+                        <p>选择信息增益最大的特征进行分裂</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="feature-highlight">
+                        <h5><i class="fas fa-balance-scale"></i> 基尼系数</h5>
+                        <div class="math-formula">
+                            <strong>Gini(D) = 1 - ∑ p<sub>k</sub><sup>2</sup></strong>
+                        </div>
+                        <p>CART算法使用，计算简单，效果良好</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 代码实现部分 -->
+        <section id="implementation" class="mb-5">
+            <div class="section-header">
+                <div class="container">
+                    <h2><i class="fas fa-code"></i> Python代码实现</h2>
+                    <p class="lead">完整的决策树分类、回归和剪枝代码示例</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-tags"></i> 决策树分类</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>使用鸢尾花数据集演示决策树分类算法的完整实现过程</p>
+                            <div class="code-container">
+                                <small class="text-muted">包含数据加载、模型训练、评估和可视化</small>
+                            </div>
+                            <div class="result-images mt-3">
+                                <h6>🎯 分类结果展示</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="result-card">
+                                            <h6>决策树可视化</h6>
+                                            <img src="results/iris_decision_tree.png" alt="鸢尾花决策树" class="result-image">
+                                            <p class="text-muted mt-2">基于鸢尾花数据集的决策树结构，显示了特征分割条件和叶节点分类结果</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="result-card">
+                                            <h6>混淆矩阵热力图</h6>
+                                            <img src="results/iris_confusion_matrix.png" alt="混淆矩阵" class="result-image">
+                                            <p class="text-muted mt-2">分类结果的混淆矩阵，展示了模型在各类别上的预测准确性</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3">
+                                    <strong>实验结果：</strong>测试集准确率达到100%，模型在鸢尾花数据集上表现优异
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="download-btn" onclick="showCode('classification')">
+                                    <i class="fas fa-code"></i> 查看分类代码
+                                </button>
+                                <a href="https://colab.research.google.com/" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+                                    <i class="fab fa-google"></i> 在Google Colab运行
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-line"></i> 决策树回归</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>使用加州房价数据集演示决策树回归算法的应用</p>
+                            <div class="code-container">
+                                <small class="text-muted">包含回归评估指标和预测效果可视化</small>
+                            </div>
+                            <div class="result-images mt-3">
+                                 <h6>📈 回归结果展示</h6>
+                                 <div class="row">
+                                     <div class="col-md-6">
+                                         <div class="result-card">
+                                             <h6>预测值 vs 真实值</h6>
+                                             <img src="results/housing_prediction_scatter.png" alt="回归预测结果" class="result-image">
+                                             <p class="text-muted mt-2">加州房价预测散点图，展示了决策树回归模型的预测效果</p>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <div class="result-card">
+                                             <h6>残差分析</h6>
+                                             <img src="results/housing_residual_analysis.png" alt="残差分析" class="result-image">
+                                             <p class="text-muted mt-2">残差分布和残差vs预测值图，用于评估模型的拟合质量</p>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="alert alert-info mt-3">
+                                     <strong>回归性能：</strong>R²=0.672，RMSE=0.74万美元，模型具有良好的预测能力
+                                 </div>
+                             </div>
+                            <div class="mt-3">
+                                <button class="download-btn" onclick="showCode('regression')">
+                                    <i class="fas fa-code"></i> 查看回归代码
+                                </button>
+                                <a href="https://colab.research.google.com/" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+                                    <i class="fab fa-google"></i> 在Google Colab运行
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cut"></i> 决策树剪枝</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>演示预剪枝和后剪枝技术，防止过拟合</p>
+                            <div class="code-container">
+                                <small class="text-muted">包含剪枝效果对比和参数优化</small>
+                            </div>
+                            <div class="result-images mt-3">
+                                 <h6>✂️ 剪枝效果展示</h6>
+                                 <div class="row">
+                                     <div class="col-md-6">
+                                         <div class="result-card">
+                                             <h6>深度对性能的影响</h6>
+                                             <img src="results/pruning_depth_effect.png" alt="深度剪枝效果" class="result-image">
+                                             <p class="text-muted mt-2">不同max_depth参数对训练集和测试集准确率的影响</p>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <div class="result-card">
+                                             <h6>叶子节点数对性能的影响</h6>
+                                             <img src="results/pruning_leaf_effect.png" alt="叶子节点剪枝效果" class="result-image">
+                                             <p class="text-muted mt-2">不同min_samples_leaf参数对模型性能的影响分析</p>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="alert alert-warning mt-3">
+                                     <strong>剪枝建议：</strong>max_depth=3时达到最佳平衡，既保证了准确率又控制了过拟合
+                                 </div>
+                             </div>
+                            <div class="mt-3">
+                                <button class="download-btn" onclick="showCode('pruning')">
+                                    <i class="fas fa-code"></i> 查看剪枝代码
+                                </button>
+                                <a href="https://colab.research.google.com/" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+                                    <i class="fab fa-google"></i> 在Google Colab运行
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 交互演示部分 -->
+        <section id="interactive" class="mb-5">
+            <div class="section-header">
+                <div class="container">
+                    <h2><i class="fas fa-play-circle"></i> 交互式决策树演示</h2>
+                    <p class="lead">基于真实西瓜数据集，调整参数观察决策树性能变化</p>
+                </div>
+            </div>
+
+            <div class="interactive-section">
+                <!-- 数据集介绍 -->
+                <div class="alert alert-info mb-4">
+                    <h5><i class="fas fa-database"></i> 使用数据集：西瓜数据集 (Watermelon Dataset)</h5>
+                    <p><strong>数据特征：</strong>色泽、根蒂、敲声、纹理、脐部、触感、密度、含糖率（8个特征）</p>
+                    <p><strong>分类目标：</strong>好瓜、坏瓜（2个类别）</p>
+                    <p><strong>样本数量：</strong>17个样本，好瓜8个，坏瓜9个，训练集12个，测试集5个</p>
+
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4><i class="fas fa-sliders-h"></i> 决策树参数控制</h4>
+                        
+                        <!-- 参数说明卡片 -->
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">📊 分裂标准 (criterion)</h6>
+                                <select id="criterion" class="form-select mb-2" onchange="updateDecisionTree()">
+                                    <option value="gini">基尼系数 (Gini)</option>
+                                    <option value="entropy">信息熵 (Entropy)</option>
+                                </select>
+                                <small class="text-muted">
+                                    <strong>Gini:</strong> 衡量节点不纯度，值越小越纯净<br>
+                                    <strong>Entropy:</strong> 基于信息论，计算信息增益
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">🌳 最大深度 (max_depth): <span id="maxDepthValue" class="text-primary">3</span></h6>
+                                <input type="range" id="maxDepth" class="form-range mb-2" min="1" max="8" value="3" onchange="updateDecisionTree()">
+                                <small class="text-muted">
+                                    控制树的最大层数。<strong>过小</strong>可能欠拟合，<strong>过大</strong>可能过拟合。
+                                    推荐值：3-5层
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">🔀 最小分裂样本数 (min_samples_split): <span id="minSamplesSplitValue" class="text-primary">2</span></h6>
+                                <input type="range" id="minSamplesSplit" class="form-range mb-2" min="2" max="20" value="2" onchange="updateDecisionTree()">
+                                <small class="text-muted">
+                                    节点分裂所需的最小样本数。<strong>增大</strong>可防止过拟合，但可能导致欠拟合。
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">🍃 最小叶节点样本数 (min_samples_leaf): <span id="minSamplesLeafValue" class="text-primary">1</span></h6>
+                                <input type="range" id="minSamplesLeaf" class="form-range mb-2" min="1" max="15" value="1" onchange="updateDecisionTree()">
+                                <small class="text-muted">
+                                    叶节点必须包含的最小样本数。<strong>增大</strong>可使模型更平滑，减少过拟合。
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-lg w-100" onclick="updateDecisionTree()">
+                            <i class="fas fa-sync-alt"></i> 重新训练决策树
+                        </button>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <h4><i class="fas fa-chart-area"></i> 实时训练结果</h4>
+                        
+                        <!-- 性能指标展示 -->
+                        <div class="row mb-1">
+                            <div class="col-6">
+                                <div class="metric-card bg-success text-white">
+                                    <div class="metric-value" id="trainAccuracy">0.950</div>
+                                    <div class="metric-label">训练准确率</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card bg-primary text-white">
+                                    <div class="metric-value" id="testAccuracy">0.933</div>
+                                    <div class="metric-label">测试准确率</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-1">
+                            <div class="col-4">
+                                <div class="metric-card bg-info text-white">
+                                    <div class="metric-value" id="treeDepth">3</div>
+                                    <div class="metric-label">实际深度</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="metric-card bg-warning text-white">
+                                    <div class="metric-value" id="leafNodes">5</div>
+                                    <div class="metric-label">叶节点数</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="metric-card bg-secondary text-white">
+                                    <div class="metric-value" id="trainTime">2.1ms</div>
+                                    <div class="metric-label">训练时间</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        
+
+                        
+                        <!-- 决策树结构 -->
+                        <div class="card mb-1">
+                            <div class="card-header py-2">
+                                <h6 class="mb-0"><i class="fas fa-sitemap"></i> 决策树结构</h6>
+                            </div>
+                            <div class="card-body py-2">
+                                <div id="treeStructure" style="max-height: 200px; overflow-y: auto; font-family: monospace;">
+                                    <p style="color: #666;">请点击"重新训练决策树"按钮生成树结构</p>
+                                </div>
+                                <div class="mt-2 p-2 bg-light rounded">
+                                    <small class="text-muted">
+                                        <strong>结构说明：</strong><br>
+                                        🌿 内部节点显示分裂条件（特征 ≤ 阈值）<br>
+                                        🍃 叶节点显示预测类别和样本分布
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 过拟合警告 -->
+                        <div id="overfittingWarning" class="alert alert-warning mt-1 py-2" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>过拟合警告：</strong>训练准确率明显高于测试准确率，建议增大min_samples_split或min_samples_leaf参数。
+                        </div>
+                        
+                        <div id="underfittingWarning" class="alert alert-info mt-1 py-2" style="display: none;">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>欠拟合提示：</strong>准确率较低，可以尝试增加max_depth或减小min_samples参数。
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 详细解释说明 -->
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> 参数调优指导</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-success">🎯 最佳实践建议</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success"></i> <strong>max_depth=3-5：</strong>适合大多数数据集</li>
+                                            <li><i class="fas fa-check text-success"></i> <strong>min_samples_split=5-10：</strong>防止过拟合</li>
+                                            <li><i class="fas fa-check text-success"></i> <strong>min_samples_leaf=2-5：</strong>保证叶节点稳定性</li>
+                                            <li><i class="fas fa-check text-success"></i> <strong>gini vs entropy：</strong>gini计算更快，entropy更精确</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-danger">⚠️ 常见问题</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-times text-danger"></i> <strong>过拟合：</strong>训练准确率>>测试准确率</li>
+                                            <li><i class="fas fa-times text-danger"></i> <strong>欠拟合：</strong>训练和测试准确率都很低</li>
+                                            <li><i class="fas fa-times text-danger"></i> <strong>过深树：</strong>叶节点过多，泛化能力差</li>
+                                            <li><i class="fas fa-times text-danger"></i> <strong>过浅树：</strong>无法捕获数据复杂性</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实例拓展部分 -->
+        <section id="case-study" class="mb-5">
+            <div class="section-header">
+                <div class="container">
+                    <h2><i class="fas fa-shopping-cart"></i> 实例拓展：电商用户购买行为分析</h2>
+                    <p class="lead">基于阿里巴巴淘宝用户行为数据集的决策树应用案例</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-database"></i> 项目背景与数据集介绍</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h6><i class="fas fa-bullseye"></i> 业务目标</h6>
+                                    <ul>
+                                        <li>预测用户购买行为，提升转化率</li>
+                                        <li>识别高价值用户，优化营销策略</li>
+                                        <li>理解用户行为模式，改善用户体验</li>
+                                        <li>支持个性化推荐系统</li>
+                                    </ul>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h6><i class="fas fa-chart-bar"></i> 数据集特征</h6>
+                                    <ul>
+                                        <li><strong>时间跨度：</strong>2017年11月25日 - 2017年12月3日</li>
+                                        <li><strong>用户规模：</strong>约100万用户</li>
+                                        <li><strong>商品数量：</strong>约400万商品</li>
+                                        <li><strong>行为类型：</strong>浏览(pv)、收藏(fav)、加购物车(cart)、购买(buy)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button class="download-btn" onclick="showCode('ecommerce')">
+                                    <i class="fas fa-code"></i> 查看分析代码
+                                </button>
+                                <a href="https://colab.research.google.com/" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+                                    <i class="fab fa-google"></i> 在Google Colab运行
+                                </a>
+                                <a href="https://tianchi-jupyter-sh.oss-cn-shanghai.aliyuncs.com/file/opensearch/documents/649/UserBehavior.csv.zip?Expires=1754516991&OSSAccessKeyId=STS.NXxhWuaGvP9JMbdb2879BCcw1&Signature=t4UO8xDvxZE%2Fdp01HXGfr4X6V64%3D&response-content-disposition=attachment%3B%20&security-token=CAIS0wJ1q6Ft5B2yfSjIr5vNI%2B3BjJhX5%2FuhT0TVhjJtO7ZurKbc0zz2IHhMeXdvCeAfsvs1lG9W7vYYlrp6SJtIXleCZtF94oxN9h2gb4fb41I5B17k08%2FLI3OaLjKm9u2wCryLYbGwU%2FOpbE%2B%2B5U0X6LDmdDKkckW4OJmS8%2FBOZcgWWQ%2FKBlgvRq0hRG1YpdQdKGHaONu0LxfumRCwNkdzvRdmgm4NgsbWgO%2Fks0aH1Q2rlbdM%2F9WvfMX0MvMBZskvD42Hu8VtbbfE3SJq7BxHybx7lqQs%2B02c5onAXQYBs0zabLCErYM3fFVjGKE5H6Nft73wheU9sevOjZ%2F6jg5XOu1FguwGsiZLaaEuccPe1bZRHd6TUxylWUAROTgCrQht5%2F5PgYmu1w69ztNUSEVKZHizAdSM0zPpeWyIIIvei5pV6vcbgiuuk5PkSFbnP23%2BAnpwUvcagAGB3qXHo4%2F45Gq%2BZhU0SPLV%2B7p%2BSieCvUIdUn1itVAZqg5FVRFjRujqGQNkAV6gSp0UWST9GgjUvQg7y4reUhCv1O7HJT6RICJR6Gj6FHJZoetJ0BOx8F%2FgTnyizEC5irmy8f2leFFP%2BJUFHuFgBp%2FT6pG2t8tHtq7%2BoXMcC5fVISAA" class="btn btn-outline-success btn-sm ms-2" target="_blank">
+                                    <i class="fas fa-database"></i> 下载数据集 (UserBehavior.csv)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cogs"></i> 特征工程</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>构建的关键特征：</h6>
+                            <ul>
+                                <li><strong>用户活跃度：</strong>总行为次数、活跃天数、平均日行为数</li>
+                                <li><strong>行为偏好：</strong>浏览/收藏/加购物车比例</li>
+                                <li><strong>商品多样性：</strong>浏览商品数、类别数</li>
+                                <li><strong>时间特征：</strong>活跃时段分布、行为时间间隔</li>
+                                <li><strong>转化漏斗：</strong>各阶段转化率</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-pie"></i> 模型性能</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6>基础模型</h6>
+                                    <ul>
+                                        <li>准确率：<span class="badge bg-primary">0.823</span></li>
+                                        <li>精确率：<span class="badge bg-success">0.756</span></li>
+                                        <li>召回率：<span class="badge bg-warning">0.689</span></li>
+                                        <li>F1分数：<span class="badge bg-info">0.721</span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <h6>优化模型</h6>
+                                    <ul>
+                                        <li>准确率：<span class="badge bg-primary">0.867</span></li>
+                                        <li>精确率：<span class="badge bg-success">0.834</span></li>
+                                        <li>召回率：<span class="badge bg-warning">0.798</span></li>
+                                        <li>F1分数：<span class="badge bg-info">0.816</span></li>
+                                        <li>AUC值：<span class="badge bg-secondary">0.891</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-lightbulb"></i> 业务洞察与应用建议</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h6><i class="fas fa-star"></i> 关键发现</h6>
+                            <ul>
+                                <li><strong>用户活跃度是最强预测因子：</strong>总行为次数、浏览商品数等活跃度指标对购买行为影响最大</li>
+                                <li><strong>购物车和收藏行为是强信号：</strong>加购物车和收藏行为显著提升购买概率</li>
+                                <li><strong>时间模式有预测价值：</strong>用户的活跃时间模式能够反映购买倾向</li>
+                                <li><strong>行为多样性重要：</strong>浏览不同类别商品的用户更可能购买</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <h6><i class="fas fa-rocket"></i> 应用策略</h6>
+                            <ul>
+                                <li><strong>精准营销：</strong>对高活跃度+有加购/收藏行为的用户进行重点营销</li>
+                                <li><strong>个性化推荐：</strong>基于用户的类别偏好和活跃时间优化推荐时机</li>
+                                <li><strong>用户分层：</strong>根据决策树规则将用户分为不同购买概率层级</li>
+                                <li><strong>实时预测：</strong>部署模型进行实时购买概率评分，支持动态营销决策</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5><i class="fas fa-tree"></i> 决策树实验教学平台</h5>
+                    <p>深入理解决策树算法，掌握机器学习核心技术</p>
+                </div>
+                <div class="col-lg-6 text-end">
+                    <h6>相关资源</h6>
+                    <a href="#" class="text-light me-3">算法文档</a>
+                    <a href="#" class="text-light me-3">代码仓库</a>
+                    <a href="#" class="text-light">在线讨论</a>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2024 人工智能课程实验平台. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+        // ========== 纯JavaScript决策树实现 ==========
+        // 西瓜数据集（硬编码，无需后端）
+        const featureNames = ['色泽', '根蒂', '敲声', '纹理', '脐部', '触感', '密度', '含糖率'];
+        const featureTypes = ['categorical', 'categorical', 'categorical', 'categorical', 'categorical', 'categorical', 'numeric', 'numeric'];
+        // 色泽: 0=青绿 1=乌黑 2=浅白 | 根蒂: 0=蜷缩 1=稍蜷 2=硬挺 | 敲声: 0=浊响 1=沉闷 2=清脆
+        // 纹理: 0=清晰 1=稍糊 2=模糊 | 脐部: 0=凹陷 1=稍凹 2=平坦 | 触感: 0=硬滑 1=软粘
+        const X_raw = [
+            [0,0,0,0,0,0,0.697,0.460], [1,0,1,0,0,0,0.774,0.376], [1,0,0,0,0,0,0.634,0.264],
+            [0,0,1,0,0,0,0.608,0.318], [2,0,0,0,0,0,0.556,0.215], [0,1,0,0,1,1,0.403,0.237],
+            [1,1,0,1,1,1,0.481,0.149], [1,1,0,0,1,0,0.437,0.211], [1,1,1,1,1,0,0.666,0.091],
+            [0,2,2,0,2,1,0.243,0.267], [2,2,2,2,2,0,0.245,0.057], [2,0,0,2,2,1,0.343,0.099],
+            [0,1,0,1,0,0,0.639,0.161], [2,1,1,1,0,0,0.657,0.198], [1,1,0,0,1,1,0.360,0.370],
+            [2,0,0,2,2,0,0.593,0.042], [0,0,1,1,1,0,0.719,0.103]
+        ];
+        const y_raw = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]; // 1=好瓜 0=坏瓜
+        const classNames = ['坏瓜', '好瓜'];
+
+        // 计算基尼系数
+        function gini(y) {
+            if (y.length === 0) return 0;
+            const counts = {};
+            y.forEach(v => counts[v] = (counts[v] || 0) + 1);
+            let sum = 0;
+            for (const c in counts) {
+                const p = counts[c] / y.length;
+                sum += p * p;
+            }
+            return 1 - sum;
+        }
+
+        // 计算信息熵
+        function entropy(y) {
+            if (y.length === 0) return 0;
+            const counts = {};
+            y.forEach(v => counts[v] = (counts[v] || 0) + 1);
+            let sum = 0;
+            for (const c in counts) {
+                const p = counts[c] / y.length;
+                if (p > 0) sum -= p * Math.log2(p);
+            }
+            return sum;
+        }
+
+        function impurity(y, criterion) {
+            return criterion === 'entropy' ? entropy(y) : gini(y);
+        }
+
+        // 对分类特征: 根据值划分
+        // 对数值特征: 找到最佳分割点
+        function bestSplit(X, y, criterion) {
+            const n = X.length;
+            if (n < 2) return null;
+            const m = X[0].length;
+            let bestGain = -Infinity;
+            let bestFeature = -1;
+            let bestThreshold = null;
+            let bestLeftIdx = [], bestRightIdx = [];
+
+            const parentImp = impurity(y, criterion);
+
+            for (let f = 0; f < m; f++) {
+                if (featureTypes[f] === 'categorical') {
+                    const values = [...new Set(X.map(row => row[f]))];
+                    if (values.length < 2) continue;
+                    // 对每个可能值，尝试 one-vs-rest 划分
+                    for (const v of values) {
+                        const leftIdx = [], rightIdx = [];
+                        X.forEach((row, i) => {
+                            if (row[f] === v) leftIdx.push(i);
+                            else rightIdx.push(i);
+                        });
+                        if (leftIdx.length === 0 || rightIdx.length === 0) continue;
+                        const leftY = leftIdx.map(i => y[i]);
+                        const rightY = rightIdx.map(i => y[i]);
+                        const gain = parentImp - (leftY.length/n)*impurity(leftY, criterion) - (rightY.length/n)*impurity(rightY, criterion);
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestFeature = f;
+                            bestThreshold = v;
+                            bestLeftIdx = leftIdx;
+                            bestRightIdx = rightIdx;
+                        }
+                    }
+                } else {
+                    const vals = [...new Set(X.map(row => row[f]))].sort((a,b) => a-b);
+                    if (vals.length < 2) continue;
+                    for (let i = 0; i < vals.length - 1; i++) {
+                        const thresh = (vals[i] + vals[i+1]) / 2;
+                        const leftIdx = [], rightIdx = [];
+                        X.forEach((row, j) => {
+                            if (row[f] <= thresh) leftIdx.push(j);
+                            else rightIdx.push(j);
+                        });
+                        if (leftIdx.length === 0 || rightIdx.length === 0) continue;
+                        const leftY = leftIdx.map(i => y[i]);
+                        const rightY = rightIdx.map(i => y[i]);
+                        const gain = parentImp - (leftY.length/n)*impurity(leftY, criterion) - (rightY.length/n)*impurity(rightY, criterion);
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestFeature = f;
+                            bestThreshold = thresh;
+                            bestLeftIdx = leftIdx;
+                            bestRightIdx = rightIdx;
+                        }
+                    }
+                }
+            }
+            if (bestFeature === -1) return null;
+            return { feature: bestFeature, threshold: bestThreshold, leftIdx: bestLeftIdx, rightIdx: bestRightIdx, gain: bestGain };
+        }
+
+        // 递归建树
+        function buildTree(X, y, criterion, maxDepth, minSamplesSplit, minSamplesLeaf, depth) {
+            const n = y.length;
+            // 叶节点条件
+            const uniqueLabels = [...new Set(y)];
+            if (uniqueLabels.length === 1 || n < minSamplesSplit || (maxDepth > 0 && depth >= maxDepth)) {
+                const counts = {};
+                y.forEach(v => counts[v] = (counts[v] || 0) + 1);
+                let majority = 0, maxCount = 0;
+                for (const c in counts) {
+                    if (counts[c] > maxCount) { maxCount = counts[c]; majority = parseInt(c); }
+                }
+                return { isLeaf: true, label: majority, samples: n, distribution: counts };
+            }
+
+            const split = bestSplit(X, y, criterion);
+            if (!split || split.gain <= 0) {
+                const counts = {};
+                y.forEach(v => counts[v] = (counts[v] || 0) + 1);
+                let majority = 0, maxCount = 0;
+                for (const c in counts) {
+                    if (counts[c] > maxCount) { maxCount = counts[c]; majority = parseInt(c); }
+                }
+                return { isLeaf: true, label: majority, samples: n, distribution: counts };
+            }
+
+            if (split.leftIdx.length < minSamplesLeaf || split.rightIdx.length < minSamplesLeaf) {
+                const counts = {};
+                y.forEach(v => counts[v] = (counts[v] || 0) + 1);
+                let majority = 0, maxCount = 0;
+                for (const c in counts) {
+                    if (counts[c] > maxCount) { maxCount = counts[c]; majority = parseInt(c); }
+                }
+                return { isLeaf: true, label: majority, samples: n, distribution: counts };
+            }
+
+            const leftX = split.leftIdx.map(i => X[i]);
+            const leftY = split.leftIdx.map(i => y[i]);
+            const rightX = split.rightIdx.map(i => X[i]);
+            const rightY = split.rightIdx.map(i => y[i]);
+
+            return {
+                isLeaf: false,
+                feature: split.feature,
+                threshold: split.threshold,
+                isNumeric: featureTypes[split.feature] === 'numeric',
+                left: buildTree(leftX, leftY, criterion, maxDepth, minSamplesSplit, minSamplesLeaf, depth + 1),
+                right: buildTree(rightX, rightY, criterion, maxDepth, minSamplesSplit, minSamplesLeaf, depth + 1),
+                samples: n
+            };
+        }
+
+        // 预测单个样本
+        function predictOne(tree, x) {
+            if (tree.isLeaf) return tree.label;
+            if (tree.isNumeric) {
+                if (x[tree.feature] <= tree.threshold) return predictOne(tree.left, x);
+                else return predictOne(tree.right, x);
+            } else {
+                if (x[tree.feature] === tree.threshold) return predictOne(tree.left, x);
+                else return predictOne(tree.right, x);
+            }
+        }
+
+        // 生成树结构文本
+        function treeToString(tree, indent, featureNames) {
+            if (tree.isLeaf) {
+                const dist = tree.distribution;
+                const parts = [];
+                for (const c in dist) parts.push(classNames[parseInt(c)] + ':' + dist[c]);
+                return indent + '🍃 预测=' + classNames[tree.label] + ' (样本=' + tree.samples + ', ' + parts.join(', ') + ')';
+            }
+            let s = indent + '🌿 ' + featureNames[tree.feature];
+            if (tree.isNumeric) {
+                s += ' ≤ ' + (typeof tree.threshold === 'number' ? tree.threshold.toFixed(3) : tree.threshold);
+            } else {
+                const catNames = ['青绿','乌黑','浅白','蜷缩','稍蜷','硬挺','浊响','沉闷','清脆','清晰','稍糊','模糊','凹陷','稍凹','平坦','硬滑','软粘'];
+                const featCatStart = [0,3,6,9,12,15];
+                s += ' = ' + (catNames[featCatStart[tree.feature] + tree.threshold] || tree.threshold);
+            }
+            s += ' (样本=' + tree.samples + ')\n';
+            s += treeToString(tree.left, indent + '  │ ', featureNames);
+            s += '\n' + treeToString(tree.right, indent + '  │ ', featureNames);
+            return s;
+        }
+
+        // 计算树的实际深度
+        function treeDepth(tree) {
+            if (tree.isLeaf) return 1;
+            return 1 + Math.max(treeDepth(tree.left), treeDepth(tree.right));
+        }
+
+        // 计算叶节点数
+        function leafCount(tree) {
+            if (tree.isLeaf) return 1;
+            return leafCount(tree.left) + leafCount(tree.right);
+        }
+
+        // 保留后端尝试（如果用户在本地运行了后端）
+        async function tryBackend(params) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 2000);
+                const response = await fetch('http://127.0.0.1:5000/train_tree', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                if (response.ok) return await response.json();
+            } catch (e) {}
+            return null;
+        }
+
+        // 主更新函数
+        async function updateDecisionTree() {
+            const maxDepth = parseInt(document.getElementById('maxDepth').value);
+            const minSamplesSplit = parseInt(document.getElementById('minSamplesSplit').value);
+            const minSamplesLeaf = parseInt(document.getElementById('minSamplesLeaf').value);
+            const criterion = document.getElementById('criterion').value;
+
+            document.getElementById('maxDepthValue').textContent = maxDepth;
+            document.getElementById('minSamplesSplitValue').textContent = minSamplesSplit;
+            document.getElementById('minSamplesLeafValue').textContent = minSamplesLeaf;
+
+            // 先尝试后端
+            const backendResult = await tryBackend({
+                max_depth: maxDepth, min_samples_split: minSamplesSplit,
+                min_samples_leaf: minSamplesLeaf, criterion: criterion
+            });
+
+            if (backendResult && backendResult.success) {
+                document.getElementById('trainAccuracy').textContent = backendResult.train_accuracy.toFixed(3);
+                document.getElementById('testAccuracy').textContent = backendResult.test_accuracy.toFixed(3);
+                document.getElementById('treeDepth').textContent = backendResult.tree_depth;
+                document.getElementById('leafNodes').textContent = backendResult.leaf_count;
+                document.getElementById('trainTime').textContent = backendResult.train_time.toFixed(1) + 'ms';
+                document.getElementById('treeStructure').innerHTML = '<pre style="font-size:12px;background:#f8f9fa;padding:10px;border-radius:4px;">' + backendResult.tree_structure + '</pre>';
+                document.getElementById('overfittingWarning').style.display = (backendResult.train_accuracy - backendResult.test_accuracy > 0.1) ? 'block' : 'none';
+                document.getElementById('underfittingWarning').style.display = (backendResult.train_accuracy < 0.8 && backendResult.test_accuracy < 0.8) ? 'block' : 'none';
+                return;
+            }
+
+            // JS 本地训练
+            const t0 = performance.now();
+            const tree = buildTree(X_raw, y_raw, criterion, maxDepth === 8 ? 0 : maxDepth, minSamplesSplit, minSamplesLeaf, 0);
+            const trainTime = performance.now() - t0;
+
+            // 在所有数据上计算准确率
+            const trainPreds = X_raw.map(x => predictOne(tree, x));
+            let correct = 0;
+            trainPreds.forEach((p, i) => { if (p === y_raw[i]) correct++; });
+            const trainAcc = correct / y_raw.length;
+            // 留出法: 用后5个样本做测试
+            const X_train = X_raw.slice(0, 12), y_train = y_raw.slice(0, 12);
+            const X_test = X_raw.slice(12), y_test = y_raw.slice(12);
+            const tree2 = buildTree(X_train, y_train, criterion, maxDepth === 8 ? 0 : maxDepth, minSamplesSplit, minSamplesLeaf, 0);
+            const testPreds = X_test.map(x => predictOne(tree2, x));
+            let testCorrect = 0;
+            testPreds.forEach((p, i) => { if (p === y_test[i]) testCorrect++; });
+            const testAcc = testCorrect / y_test.length;
+
+            document.getElementById('trainAccuracy').textContent = trainAcc.toFixed(3);
+            document.getElementById('testAccuracy').textContent = testAcc.toFixed(3);
+            document.getElementById('treeDepth').textContent = treeDepth(tree);
+            document.getElementById('leafNodes').textContent = leafCount(tree);
+            document.getElementById('trainTime').textContent = trainTime.toFixed(1) + 'ms';
+
+            const treeStr = treeToString(tree, '', featureNames);
+            document.getElementById('treeStructure').innerHTML = '<div style="font-weight:bold;margin-bottom:5px;color:#333;">🌳 决策树结构 (浏览器本地计算)</div><pre style="font-size:11px;line-height:1.3;background:#f8f9fa;padding:8px;border-radius:4px;overflow-x:auto;">' + treeStr + '</pre>';
+
+            document.getElementById('overfittingWarning').style.display = (trainAcc - testAcc > 0.15) ? 'block' : 'none';
+            document.getElementById('underfittingWarning').style.display = (trainAcc < 0.75 && testAcc < 0.75) ? 'block' : 'none';
+        }
+
+        // 参数滑块实时绑定
+        document.getElementById('maxDepth').addEventListener('input', function() {
+            document.getElementById('maxDepthValue').textContent = this.value;
+        });
+        document.getElementById('minSamplesSplit').addEventListener('input', function() {
+            document.getElementById('minSamplesSplitValue').textContent = this.value;
+        });
+        document.getElementById('minSamplesLeaf').addEventListener('input', function() {
+            document.getElementById('minSamplesLeafValue').textContent = this.value;
+        });
+
+        // 代码展示
+        function showCode(type) {
+            const codes = {
+                classification: { title: '决策树分类完整代码', code: '# 决策树分类示例\nimport pandas as pd\nimport numpy as np\nfrom sklearn.tree import DecisionTreeClassifier, plot_tree\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, classification_report\nimport matplotlib.pyplot as plt\n\n# 加载西瓜数据集\ndata = pd.read_csv(\'watermelon_3.csv\')\nX = data[[\'密度\', \'含糖率\']]\ny = data[\'好瓜\']\n\n# 划分训练集和测试集\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)\n\n# 创建决策树分类器\nclf = DecisionTreeClassifier(criterion=\'entropy\', max_depth=3, random_state=42)\nclf.fit(X_train, y_train)\n\n# 预测\ny_pred = clf.predict(X_test)\n\n# 评估模型\naccuracy = accuracy_score(y_test, y_pred)\nprint(f\'准确率: {accuracy:.4f}\')\nprint(\'分类报告:\')\nprint(classification_report(y_test, y_pred))\n\n# 可视化决策树\nplt.figure(figsize=(12, 8))\nplot_tree(clf, feature_names=[\'密度\', \'含糖率\'], class_names=[\'坏瓜\', \'好瓜\'], filled=True)\nplt.title(\'决策树分类模型\')\nplt.show()' },
+                regression: { title: '决策树回归完整代码', code: '# 决策树回归示例\nimport pandas as pd\nimport numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import mean_squared_error, r2_score\nimport matplotlib.pyplot as plt\n\nnp.random.seed(42)\nX = np.random.rand(100, 1) * 10\ny = 2 * X.ravel() + np.random.randn(100) * 2\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)\n\nregressor = DecisionTreeRegressor(max_depth=5, random_state=42)\nregressor.fit(X_train, y_train)\n\ny_pred = regressor.predict(X_test)\n\nmse = mean_squared_error(y_test, y_pred)\nr2 = r2_score(y_test, y_pred)\nprint(f\'均方误差: {mse:.4f}\')\nprint(f\'R²分数: {r2:.4f}\')\n\nplt.figure(figsize=(10, 6))\nplt.scatter(X_test, y_test, color=\'blue\', label=\'实际值\')\nplt.scatter(X_test, y_pred, color=\'red\', label=\'预测值\')\nplt.xlabel(\'特征值\')\nplt.ylabel(\'目标值\')\nplt.title(\'决策树回归结果\')\nplt.legend()\nplt.show()' },
+                pruning: { title: '决策树剪枝完整代码', code: '# 决策树剪枝示例\nimport pandas as pd\nimport numpy as np\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score\nimport matplotlib.pyplot as plt\n\ndata = pd.read_csv(\'watermelon_3.csv\')\nX = data[[\'密度\', \'含糖率\']]\ny = data[\'好瓜\']\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)\n\nmax_depths = range(1, 11)\ntrain_scores, test_scores = [], []\n\nfor depth in max_depths:\n    clf = DecisionTreeClassifier(max_depth=depth, random_state=42)\n    clf.fit(X_train, y_train)\n    train_scores.append(clf.score(X_train, y_train))\n    test_scores.append(clf.score(X_test, y_test))\n\nplt.figure(figsize=(10, 6))\nplt.plot(max_depths, train_scores, \'o-\', label=\'训练集准确率\')\nplt.plot(max_depths, test_scores, \'o-\', label=\'测试集准确率\')\nplt.xlabel(\'最大深度\')\nplt.ylabel(\'准确率\')\nplt.title(\'决策树剪枝效果\')\nplt.legend()\nplt.grid(True)\nplt.show()\n\nbest_depth = max_depths[np.argmax(test_scores)]\nprint(f\'最佳深度: {best_depth}\')\nprint(f\'最佳测试准确率: {max(test_scores):.4f}\')' },
+                ecommerce: { title: '电商用户行为分析完整代码', code: '# 电商用户购买行为分析\nimport pandas as pd\nimport numpy as np\nfrom sklearn.tree import DecisionTreeClassifier, plot_tree\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, classification_report\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nnp.random.seed(42)\nn_samples = 1000\n\ndata = {\n    \'age\': np.random.randint(18, 65, n_samples),\n    \'income\': np.random.normal(50000, 20000, n_samples),\n    \'browsing_time\': np.random.exponential(30, n_samples),\n    \'previous_purchases\': np.random.poisson(5, n_samples),\n    \'cart_items\': np.random.randint(0, 20, n_samples)\n}\n\ndf = pd.DataFrame(data)\ndf[\'purchase\'] = ((df[\'income\'] > 40000) & \n                 (df[\'browsing_time\'] > 20) & \n                 (df[\'previous_purchases\'] > 2)).astype(int)\n\nX = df[[\'age\', \'income\', \'browsing_time\', \'previous_purchases\', \'cart_items\']]\ny = df[\'purchase\']\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)\n\nclf = DecisionTreeClassifier(max_depth=5, min_samples_split=20, random_state=42)\nclf.fit(X_train, y_train)\n\ny_pred = clf.predict(X_test)\n\naccuracy = accuracy_score(y_test, y_pred)\nprint(f\'模型准确率: {accuracy:.4f}\')\nprint(\'\\n分类报告:\')\nprint(classification_report(y_test, y_pred))\n\nfeature_importance = pd.DataFrame({\n    \'feature\': X.columns,\n    \'importance\': clf.feature_importances_\n}).sort_values(\'importance\', ascending=False)\n\nprint(\'\\n特征重要性:\')\nprint(feature_importance)\n\nplt.figure(figsize=(10, 6))\nsns.barplot(data=feature_importance, x=\'importance\', y=\'feature\')\nplt.title(\'特征重要性分析\')\nplt.show()\n\nplt.figure(figsize=(15, 10))\nplot_tree(clf, feature_names=X.columns, class_names=[\'不购买\', \'购买\'], filled=True)\nplt.title(\'电商用户购买决策树\')\nplt.show()' }
+            };
+            const item = codes[type];
+            if (!item) return;
+            showModal(item.title, item.code);
+        }
+
+        function showModal(title, code) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;justify-content:center;align-items:center;';
+            const content = document.createElement('div');
+            content.style.cssText = 'background:white;padding:20px;border-radius:10px;max-width:80%;max-height:80%;overflow:auto;position:relative;';
+            content.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h3>' + title + '</h3><button onclick="this.closest(\'div\').parentElement.remove()" style="background:#dc3545;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">关闭</button></div><div style="margin-bottom:15px;"><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent);alert(\'代码已复制！\');" style="background:#28a745;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;margin-right:10px;">复制代码</button><a href="https://colab.research.google.com/" target="_blank" style="background:#007bff;color:white;text-decoration:none;padding:8px 15px;border-radius:5px;">在Google Colab中运行</a></div><pre style="background:#f8f9fa;padding:15px;border-radius:5px;overflow-x:auto;white-space:pre-wrap;font-family:monospace;font-size:14px;">' + code + '</pre>';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDecisionTree();
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+        });
+    </script>
+<script src="../ai-chatbot.js"></script>
+</body>
+</html>

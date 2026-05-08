@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能实验讲义</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-secondary: #666;
+            --header-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --nav-bg: rgba(255,255,255,0.95);
+            --border: #e8ecf1;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --hover-shadow: 0 12px 36px rgba(0,0,0,0.14);
+            --accent: #667eea;
+            --accent2: #764ba2;
+            --chip-bg: #eef0ff;
+            --chip-color: #667eea;
+            --section-bg: rgba(255,255,255,0.5);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f0f1a;
+            --card-bg: #1a1a2e;
+            --text: #e0e0e0;
+            --text-secondary: #999;
+            --nav-bg: rgba(26,26,46,0.95);
+            --border: #2a2a40;
+            --shadow: 0 4px 24px rgba(0,0,0,0.3);
+            --hover-shadow: 0 12px 36px rgba(0,0,0,0.5);
+            --chip-bg: #252540;
+            --chip-color: #8899ee;
+            --section-bg: rgba(26,26,46,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ====== 导航栏 ====== */
+        .navbar {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .navbar .logo {
+            font-size: 1.15em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .navbar .nav-actions {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .navbar .nav-actions button {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .navbar .nav-actions button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ====== Hero ====== */
+        .hero {
+            background: var(--header-bg);
+            color: #fff;
+            text-align: center;
+            padding: 60px 24px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 70%, rgba(102,126,234,0.15), transparent 60%),
+                        radial-gradient(circle at 70% 30%, rgba(118,75,162,0.12), transparent 60%);
+            animation: heroGlow 20s ease-in-out infinite;
+        }
+        @keyframes heroGlow {
+            0%,100% { transform: translate(0,0); }
+            33% { transform: translate(2%,-1%); }
+            66% { transform: translate(-1%,1%); }
+        }
+        .hero h1 {
+            font-size: 3em; font-weight: 800;
+            position: relative; z-index: 1;
+            background: linear-gradient(135deg, #fff, #c0d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2em; opacity: 0.85; position: relative; z-index: 1;
+            margin-top: 8px;
+        }
+        .hero .stats-row {
+            display: flex; justify-content: center; gap: 48px;
+            margin-top: 32px; position: relative; z-index: 1;
+            flex-wrap: wrap;
+        }
+        .hero .stat-item { text-align: center; }
+        .hero .stat-number { font-size: 2.4em; font-weight: 800; }
+        .hero .stat-label { font-size: 0.9em; opacity: 0.7; margin-top: 4px; }
+
+        /* ====== 搜索栏 ====== */
+        .search-bar {
+            max-width: 600px; margin: -24px auto 32px;
+            position: relative; z-index: 10;
+            padding: 0 24px;
+        }
+        .search-bar input {
+            width: 100%; padding: 14px 20px 14px 46px;
+            border: 2px solid transparent;
+            border-radius: 28px;
+            font-size: 15px;
+            background: var(--card-bg);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-bar input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 4px 28px rgba(102,126,234,0.2);
+        }
+        .search-bar .search-icon {
+            position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
+            color: #999; font-size: 16px; pointer-events: none;
+        }
+
+        /* ====== 章节网格 ====== */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; }
+        .section-title {
+            font-size: 1.6em; font-weight: 700; margin: 32px 0 20px;
+            color: var(--text);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--border); margin-top: 2px;
+        }
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .chapter-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .chapter-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--accent);
+        }
+        .chapter-card .card-accent {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+        .chapter-card .chap-num {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            font-weight: 700;
+            background: var(--chip-bg);
+            color: var(--chip-color);
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+        .chapter-card h3 { font-size: 1.2em; margin-bottom: 6px; }
+        .chapter-card p { color: var(--text-secondary); font-size: 0.9em; line-height: 1.5; flex: 1; }
+        .chapter-card .card-arrow {
+            margin-top: 14px; align-self: flex-end;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--chip-bg); color: var(--chip-color);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: all 0.3s;
+        }
+        .chapter-card:hover .card-arrow {
+            background: var(--accent); color: #fff;
+        }
+        .chapter-card.hidden { display: none; }
+
+        /* ====== 无结果 ====== */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+        .no-results .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+        .no-results.show { display: block; }
+
+        /* ====== 学习资源 ====== */
+        .resources-section {
+            margin: 32px 0 24px;
+        }
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .resource-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex; align-items: flex-start; gap: 14px;
+        }
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--accent);
+        }
+        .resource-card .res-icon {
+            font-size: 1.8em; flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--chip-bg);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .resource-card .res-info h4 { font-size: 0.95em; margin-bottom: 2px; }
+        .resource-card .res-info p { font-size: 0.8em; color: var(--text-secondary); line-height: 1.4; }
+
+        /* ====== Footer ====== */
+        .footer {
+            text-align: center;
+            padding: 32px 24px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        /* ====== 响应式 ====== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2em; }
+            .hero .stats-row { gap: 24px; }
+            .hero .stat-number { font-size: 1.8em; }
+            .chapter-grid { grid-template-columns: 1fr; }
+            .resource-grid { grid-template-columns: 1fr; }
+        }
+
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeInUp 0.6s ease both;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <span class="logo"><i class="fa-solid fa-brain"></i> AI 实验讲义</span>
+    <div class="nav-actions">
+        <button id="themeToggle" title="切换暗色/亮色模式"><i class="fa-solid fa-moon"></i></button>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <h1>人工智能实验讲义</h1>
+    <p>从基础编程到深度学习 — 系统掌握 AI 核心技术</p>
+    <div class="stats-row">
+        <div class="stat-item"><span class="stat-number">12</span><div class="stat-label">课程章节</div></div>
+        <div class="stat-item"><span class="stat-number">10+</span><div class="stat-label">互动实验</div></div>
+        <div class="stat-item"><span class="stat-number">50+</span><div class="stat-label">代码示例</div></div>
+        <div class="stat-item"><span class="stat-number">16</span><div class="stat-label">学习资源</div></div>
+    </div>
+</header>
+
+<!-- 搜索栏 -->
+<div class="search-bar">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input type="text" id="chapterSearch" placeholder="搜索章节...（如：CNN、SVM、聚类、回归）">
+</div>
+
+<!-- 章节列表 -->
+<div class="container">
+    <h2 class="section-title">课程章节</h2>
+    <div class="chapter-grid" id="chapterGrid">
+        <a href="ch01_python/python_tutorial.html" class="chapter-card fade-in" data-keywords="python 编程 基础">
+            <div class="card-accent"></div>
+            <span class="chap-num">第一章</span>
+            <h3>Python 编程基础</h3>
+            <p>掌握Python语言基础，包括数据类型、控制结构、函数定义等核心概念，为机器学习打下坚实编程基础。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch02_astar/第二章 A星算法实验.html" class="chapter-card fade-in" data-keywords="A* A星 搜索 启发式 路径规划">
+            <div class="card-accent"></div>
+            <span class="chap-num">第二章</span>
+            <h3>A* 搜索算法</h3>
+            <p>学习经典的启发式搜索算法，理解人工智能中路径规划的基本原理和实现方法。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch03_regression/第三章 回归分析实验.html" class="chapter-card fade-in" data-keywords="回归 线性 多项式 regression 预测">
+            <div class="card-accent"></div>
+            <span class="chap-num">第三章</span>
+            <h3>回归分析</h3>
+            <p>探索线性回归和多项式回归，学习如何建立数据之间的数学关系模型，实现预测分析。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch04_lda/第四章 线性判别分析实验.html" class="chapter-card fade-in" data-keywords="LDA 判别 降维 分类 线性">
+            <div class="card-accent"></div>
+            <span class="chap-num">第四章</span>
+            <h3>线性判别分析</h3>
+            <p>学习经典的监督降维与分类算法，理解如何通过线性变换最大化类间分离度。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch05_adaboost/第五章 AdaBoosting算法教学网页.html" class="chapter-card fade-in" data-keywords="AdaBoost 集成 boosting 弱分类器 集成学习">
+            <div class="card-accent"></div>
+            <span class="chap-num">第五章</span>
+            <h3>AdaBoost 算法</h3>
+            <p>掌握集成学习的经典算法，学习如何通过弱学习器的迭代组合构建强分类器。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch06_svm/第六章 支持向量机教学网页.html" class="chapter-card fade-in" data-keywords="SVM 支持向量机 核函数 分类 最大间隔">
+            <div class="card-accent"></div>
+            <span class="chap-num">第六章</span>
+            <h3>支持向量机</h3>
+            <p>学习强大的分类和回归算法，理解核技巧和最大间隔分类的核心思想。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch07_decision_tree/第七章 决策树实验讲义.html" class="chapter-card fade-in" data-keywords="决策树 信息增益 剪枝 CART 分类">
+            <div class="card-accent"></div>
+            <span class="chap-num">第七章</span>
+            <h3>决策树算法</h3>
+            <p>探索直观易懂的分类算法，学习信息增益、基尼系数、剪枝等关键概念。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch08_kmeans/第八章 K-means聚类教学网页.html" class="chapter-card fade-in" data-keywords="K-means 聚类 无监督 肘部法则">
+            <div class="card-accent"></div>
+            <span class="chap-num">第八章</span>
+            <h3>K-means 聚类</h3>
+            <p>学习无监督学习的经典算法，掌握数据聚类和模式发现的基本方法。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch09_eigenface/第九章 特征脸方法实验讲义.html" class="chapter-card fade-in" data-keywords="特征脸 PCA 人脸识别 主成分分析 eigenface">
+            <div class="card-accent"></div>
+            <span class="chap-num">第九章</span>
+            <h3>特征脸方法</h3>
+            <p>探索人脸识别的经典方法，学习主成分分析（PCA）在图像处理中的实际应用。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch10_lle/LLE实验结果展示.html" class="chapter-card fade-in" data-keywords="LLE 流形学习 降维 非线性 局部线性嵌入">
+            <div class="card-accent"></div>
+            <span class="chap-num">第十章</span>
+            <h3>局部线性嵌入</h3>
+            <p>学习非线性降维技术，理解流形学习在高维数据处理中的重要作用。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch11_cnn/cnn_teaching_webpage.html" class="chapter-card fade-in" data-keywords="CNN 卷积 神经网络 深度学习 图像识别">
+            <div class="card-accent"></div>
+            <span class="chap-num">第十一章</span>
+            <h3>卷积神经网络</h3>
+            <p>深入学习CNN核心技术，掌握图像识别和计算机视觉的基础——从LeNet到ResNet。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+        <a href="ch12_rnn/rnn_tutorial.html" class="chapter-card fade-in" data-keywords="RNN LSTM GRU 循环 序列 自然语言处理">
+            <div class="card-accent"></div>
+            <span class="chap-num">第十二章</span>
+            <h3>循环神经网络</h3>
+            <p>探索序列数据处理的强大工具，学习LSTM/GRU架构和自然语言处理基础。</p>
+            <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+    </div>
+    <div class="no-results" id="noResults">
+        <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <p>没有找到匹配的章节，试试其他关键词</p>
+    </div>
+
+    <!-- 学习资源 -->
+    <div class="resources-section">
+        <h2 class="section-title">推荐学习资源</h2>
+        <div class="resource-grid">
+            <!-- 国内资源 -->
+            <a href="https://space.bilibili.com/1567748478/channel/seriesdetail?sid=358497" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-brands fa-bilibili"></i></div>
+                <div class="res-info">
+                    <h4>李沐《动手学深度学习》</h4>
+                    <p>B站热门AI课程，理论+代码，中文讲授</p>
+                </div>
+            </a>
+            <a href="https://zh.d2l.ai/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-book-open"></i></div>
+                <div class="res-info">
+                    <h4>D2L.ai 动手学深度学习</h4>
+                    <p>交互式深度学习教材，含PyTorch代码实现</p>
+                </div>
+            </a>
+            <a href="https://aistudio.baidu.com/aistudio/course" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-feather"></i></div>
+                <div class="res-info">
+                    <h4>百度AI Studio</h4>
+                    <p>免费GPU资源，飞桨框架，大量实训项目</p>
+                </div>
+            </a>
+            <a href="https://tianchi.aliyun.com/learn" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-cloud"></i></div>
+                <div class="res-info">
+                    <h4>阿里云天池</h4>
+                    <p>AI竞赛平台，实战项目与免费学习课程</p>
+                </div>
+            </a>
+
+            <!-- 国际课程 -->
+            <a href="https://www.coursera.org/specializations/machine-learning" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="res-info">
+                    <h4>Coursera 机器学习专项课</h4>
+                    <p>Andrew Ng 2022新版课程，涵盖监督/非监督学习</p>
+                </div>
+            </a>
+            <a href="https://cs231n.stanford.edu/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-eye"></i></div>
+                <div class="res-info">
+                    <h4>Stanford CS231n</h4>
+                    <p>最经典的计算机视觉课程，讲义+作业公开</p>
+                </div>
+            </a>
+            <a href="https://huggingface.co/learn" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-regular fa-face-smile"></i></div>
+                <div class="res-info">
+                    <h4>Hugging Face 课程</h4>
+                    <p>NLP与Transformer权威教程，开源免费</p>
+                </div>
+            </a>
+            <a href="https://speech.ee.ntu.edu.tw/~hylee/ml/2025-spring.php" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                <div class="res-info">
+                    <h4>李宏毅机器学习</h4>
+                    <p>台大经典课程，中文讲授，风格生动易懂</p>
+                </div>
+            </a>
+
+            <!-- 框架与工具 -->
+            <a href="https://pytorch.org/tutorials/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-fire"></i></div>
+                <div class="res-info">
+                    <h4>PyTorch 官方教程</h4>
+                    <p>深度学习框架权威文档，含完整示例</p>
+                </div>
+            </a>
+            <a href="https://www.deeplearning.ai/short-courses/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-microchip"></i></div>
+                <div class="res-info">
+                    <h4>DeepLearning.AI 短课程</h4>
+                    <p>1-2小时免费微课程，LangChain、RAG等前沿技术</p>
+                </div>
+            </a>
+            <a href="https://github.com/mli/paper-reading" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="res-info">
+                    <h4>李沐论文精读</h4>
+                    <p>逐篇精读经典AI论文（Transformer、BERT、GPT等）</p>
+                </div>
+            </a>
+            <a href="https://www.kaggle.com/learn" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-trophy"></i></div>
+                <div class="res-info">
+                    <h4>Kaggle Learn</h4>
+                    <p>免费数据科学微课程+竞赛实战</p>
+                </div>
+            </a>
+
+            <!-- 社区与资源 -->
+            <a href="https://paperswithcode.com/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-code"></i></div>
+                <div class="res-info">
+                    <h4>Papers With Code</h4>
+                    <p>论文+代码+排行榜，跟踪SOTA进展</p>
+                </div>
+            </a>
+            <a href="https://github.com/ShusenTang/Dive-into-DL-PyTorch" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-brands fa-github"></i></div>
+                <div class="res-info">
+                    <h4>动手学深度学习 PyTorch版</h4>
+                    <p>中文教材开源代码，Jupyter可运行</p>
+                </div>
+            </a>
+            <a href="https://fast.ai/" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-rocket"></i></div>
+                <div class="res-info">
+                    <h4>Fast.ai</h4>
+                    <p>自上而下学深度学习，先动手再理解理论</p>
+                </div>
+            </a>
+            <a href="https://www.tensorflow.org/learn" target="_blank" class="resource-card">
+                <div class="res-icon"><i class="fa-solid fa-brain"></i></div>
+                <div class="res-info">
+                    <h4>TensorFlow 学习中心</h4>
+                    <p>Google官方ML学习路径与教程</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>人工智能实验讲义 &copy; 2024 &mdash; 开启你的 AI 学习之旅</p>
+</footer>
+
+<!-- AI 问答助手 -->
+<script src="ai-chatbot.js"></script>
+
+<script>
+(function() {
+    // ===== 暗色/亮色模式切换 =====
+    var themeBtn = document.getElementById('themeToggle');
+    var themeIcon = themeBtn.querySelector('i');
+    var body = document.body;
+    var savedTheme = localStorage.getItem('ai-course-theme') || 'light';
+
+    function setTheme(theme) {
+        body.setAttribute('data-theme', theme);
+        localStorage.setItem('ai-course-theme', theme);
+        themeIcon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    setTheme(savedTheme);
+    themeBtn.addEventListener('click', function() {
+        var current = body.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // ===== 章节搜索 =====
+    var searchInput = document.getElementById('chapterSearch');
+    var cards = document.querySelectorAll('.chapter-card');
+    var noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', function() {
+        var query = this.value.toLowerCase().trim();
+        var visibleCount = 0;
+
+        cards.forEach(function(card, i) {
+            var keywords = (card.getAttribute('data-keywords') || '').toLowerCase();
+            var text = (card.textContent || '').toLowerCase();
+            var match = !query || keywords.indexOf(query) !== -1 || text.indexOf(query) !== -1;
+
+            if (match) {
+                card.classList.remove('hidden');
+                card.style.animationDelay = (visibleCount * 0.05) + 's';
+                card.classList.add('fade-in');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+                card.classList.remove('fade-in');
+            }
+        });
+
+        if (visibleCount === 0 && query) {
+            noResults.classList.add('show');
+        } else {
+            noResults.classList.remove('show');
+        }
+    });
+
+    // ===== 延迟动画 =====
+    cards.forEach(function(card, i) {
+        card.style.animationDelay = (i * 0.06) + 's';
+    });
+})();
+</script>
+
+</body>
+</html>

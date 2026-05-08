@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线性判别分析(LDA)交互式教学平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .nav-tab:last-child {
+            border-right: none;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .nav-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            margin: 20px 0 15px 0;
+            font-size: 1.4em;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .code-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .code-container pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .interactive-demo {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-controls label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .demo-controls input, .demo-controls select {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .demo-controls input:focus, .demo-controls select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .quiz-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        .quiz-question {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .quiz-options {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .quiz-options li {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .quiz-options li:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        
+        .quiz-options li.selected {
+            background: #667eea;
+            color: white;
+        }
+        
+        .quiz-options li.correct {
+            background: #28a745;
+            color: white;
+        }
+        
+        .quiz-options li.incorrect {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .formula-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #dee2e6;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .demo-controls {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页按钮 -->
+    <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    ">
+        <a href="../index.html" style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        " onmouseover="this.style.background='white'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='scale(1)'">
+            <span style="font-size: 18px;">←</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🧠 线性判别分析(LDA)交互式教学平台</h1>
+            <p>探索机器学习中的经典降维与分类算法</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('theory')">📚 理论基础</button>
+            <button class="nav-tab" onclick="showTab('implementation')">💻 代码实现</button>
+            <button class="nav-tab" onclick="showTab('visualization')">📊 可视化演示</button>
+            <button class="nav-tab" onclick="showTab('practice')">🎯 实践练习</button>
+            <button class="nav-tab" onclick="showTab('quiz')">📝 知识测验</button>
+        </div>
+        
+        <div class="content">
+            <!-- 理论基础标签页 -->
+            <div id="theory" class="tab-content active">
+                <div class="section">
+                    <h2>🎯 什么是线性判别分析？</h2>
+                    <div class="highlight">
+                        <p><strong>线性判别分析(LDA)</strong>是一种有监督的降维方法，它的目标是找到一个投影方向，使得：</p>
+                        <ul style="margin: 10px 0 0 20px;">
+                            <li>📍 <strong>同类样本</strong>投影后尽可能聚集在一起</li>
+                            <li>📍 <strong>不同类样本</strong>投影后尽可能分离</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🔬 核心数学原理</h2>
+                    <h3>二分类情况</h3>
+                    
+                    <div class="formula-box">
+                        <h4>类内散度矩阵（衡量同类样本的离散程度）</h4>
+                        <p>\[S_w = S_1 + S_2 = \sum_{x \in X_1}(x-\mu_1)(x-\mu_1)^T + \sum_{x \in X_2}(x-\mu_2)(x-\mu_2)^T\]</p>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <h4>类间散度矩阵（衡量不同类样本的分离程度）</h4>
+                        <p>\[S_b = (\mu_1 - \mu_2)(\mu_1 - \mu_2)^T\]</p>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <h4>优化目标：最大化广义瑞利商</h4>
+                        <p>\[J(w) = \frac{w^T S_b w}{w^T S_w w}\]</p>
+                        <p><strong>最佳投影方向：</strong> \(w = S_w^{-1}(\mu_1 - \mu_2)\)</p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>⚖️ LDA vs PCA 对比</h2>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>特征</th>
+                                <th>LDA</th>
+                                <th>PCA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>监督性</strong></td>
+                                <td>有监督（需要类别标签）</td>
+                                <td>无监督（不需要标签）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>优化目标</strong></td>
+                                <td>最大化类间可分性</td>
+                                <td>最大化数据方差</td>
+                            </tr>
+                            <tr>
+                                <td><strong>降维限制</strong></td>
+                                <td>最多C-1维（C为类别数）</td>
+                                <td>无限制</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应用场景</strong></td>
+                                <td>分类任务预处理</td>
+                                <td>数据可视化、去噪</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 代码实现标签页 -->
+            <div id="implementation" class="tab-content">
+                <div class="section">
+                    <h2>🛠️ 环境准备</h2>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score</code></pre>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 数据加载与预处理</h2>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 加载鸢尾花数据集
+data = load_iris()
+X, y = data.data, data.target
+
+# 数据标准化
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print(f"原始数据形状: {X.shape}")
+print(f"类别数量: {len(np.unique(y))}")</code></pre>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🎯 LDA降维实现</h2>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 创建LDA模型
+lda = LinearDiscriminantAnalysis(n_components=2)
+X_lda = lda.fit_transform(X_scaled, y)
+
+# 查看降维结果
+print(f"降维后数据形状: {X_lda.shape}")
+print(f"解释方差比: {lda.explained_variance_ratio_}")
+
+# 可视化降维结果
+plt.figure(figsize=(10, 6))
+colors = ['red', 'green', 'blue']
+for i, color in enumerate(colors):
+    plt.scatter(X_lda[y == i, 0], X_lda[y == i, 1], 
+                c=color, label=data.target_names[i], alpha=0.7)
+plt.xlabel('LD1')
+plt.ylabel('LD2')
+plt.title('LDA降维结果')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()</code></pre>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🔍 手写数字分类实例</h2>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>from sklearn.datasets import load_digits
+from sklearn.linear_model import LogisticRegression
+
+# 加载手写数字数据集
+digits = load_digits()
+X, y = digits.data, digits.target
+
+# 数据分割
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+# LDA降维（最多降至9维，因为有10个类别）
+lda = LinearDiscriminantAnalysis(n_components=9)
+X_train_lda = lda.fit_transform(X_train, y_train)
+X_test_lda = lda.transform(X_test)
+
+# 分类器训练与测试
+clf = LogisticRegression(max_iter=1000)
+clf.fit(X_train_lda, y_train)
+y_pred = clf.predict(X_test_lda)
+
+print(f"原始特征维度: {X_train.shape[1]}")
+print(f"降维后特征维度: {X_train_lda.shape[1]}")
+print(f"分类准确率: {accuracy_score(y_test, y_pred):.4f}")</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 可视化演示标签页 -->
+            <div id="visualization" class="tab-content">
+                <div class="section">
+                    <h2>📊 交互式LDA演示</h2>
+                    <div class="interactive-demo">
+                        <h3>🎮 参数调节</h3>
+                        <div class="demo-controls">
+                            <div>
+                                <label for="dataset-select">数据集:</label>
+                                <select id="dataset-select" onchange="updateVisualization()">
+                                    <option value="iris">鸢尾花数据集</option>
+                                    <option value="wine">红酒数据集</option>
+                                    <option value="synthetic">合成数据集</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="components-slider">降维维度:</label>
+                                <input type="range" id="components-slider" min="1" max="2" value="2" 
+                                       onchange="updateVisualization()">
+                                <span id="components-value">2</span>
+                            </div>
+                            <button class="btn" onclick="generateVisualization()">🔄 重新生成</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="ldaChart"></canvas>
+                        </div>
+                        
+                        <div id="analysis-results">
+                            <h4>📈 分析结果</h4>
+                            <div id="results-content">
+                                <p>请选择数据集并点击"重新生成"按钮查看LDA降维效果</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 实践练习标签页 -->
+            <div id="practice" class="tab-content">
+                <div class="section">
+                    <h2>🎯 填空练习</h2>
+                    
+                    <div class="quiz-container">
+                        <div class="quiz-question">练习1: 数据标准化</div>
+                        <p>请填写正确的标准化代码：</p>
+                        <div class="code-container">
+                            <pre><code>scaler = <input type="text" id="fill1" placeholder="填写答案" style="background: #4a5568; color: white; border: 1px solid #667eea; padding: 2px 5px;">
+X_scaled = scaler.fit_transform(X)</code></pre>
+                        </div>
+                        <button class="btn" onclick="checkFillBlank(1, 'StandardScaler()')">检查答案</button>
+                        <div id="feedback1" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <div class="quiz-container">
+                        <div class="quiz-question">练习2: LDA模型参数</div>
+                        <p>请填写LDA模型的正确参数：</p>
+                        <div class="code-container">
+                            <pre><code>lda = LinearDiscriminantAnalysis(<input type="text" id="fill2" placeholder="填写参数" style="background: #4a5568; color: white; border: 1px solid #667eea; padding: 2px 5px;">)</code></pre>
+                        </div>
+                        <button class="btn" onclick="checkFillBlank(2, 'n_components=2')">检查答案</button>
+                        <div id="feedback2" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <div class="quiz-container">
+                        <div class="quiz-question">练习3: 可视化代码</div>
+                        <p>请填写完整的可视化代码：</p>
+                        <div class="code-container">
+                            <pre><code>plt.scatter(X_lda[:, 0], X_lda[:, 1], c=y, cmap='viridis')
+<input type="text" id="fill3" placeholder="填写可视化标签代码" style="background: #4a5568; color: white; border: 1px solid #667eea; padding: 2px 5px; width: 300px;"></code></pre>
+                        </div>
+                        <button class="btn" onclick="checkFillBlank(3, 'plt.xlabel(\'LD1\'); plt.ylabel(\'LD2\'); plt.title(\'LDA降维结果\'); plt.show()')">检查答案</button>
+                        <div id="feedback3" style="margin-top: 10px;"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🤔 思考题</h2>
+                    <div class="quiz-container">
+                        <h3>问题1: LDA的数学推导</h3>
+                        <p>请推导LDA目标函数 \(J(w) = \frac{w^T S_b w}{w^T S_w w}\) 的最大化过程。</p>
+                        <textarea id="thinking1" rows="5" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px; margin: 10px 0;" placeholder="请在此输入你的推导过程..."></textarea>
+                        <button class="btn" onclick="showThinkingAnswer(1)">查看参考答案</button>
+                        <div id="thinking-answer1" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>参考答案：</strong><br>
+                            使用拉格朗日乘子法，对目标函数求导并令导数为0，得到：<br>
+                            \(\frac{\partial J}{\partial w} = \frac{2S_b w \cdot w^T S_w w - 2S_w w \cdot w^T S_b w}{(w^T S_w w)^2} = 0\)<br>
+                            简化得到：\(S_b w = \lambda S_w w\)<br>
+                            这是一个广义特征值问题，求解可得最佳投影方向。
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-container">
+                        <h3>问题2: 非高斯分布的影响</h3>
+                        <p>当数据不满足高斯分布假设时，LDA的性能会如何变化？请举一个具体案例。</p>
+                        <textarea id="thinking2" rows="5" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px; margin: 10px 0;" placeholder="请在此输入你的分析..."></textarea>
+                        <button class="btn" onclick="showThinkingAnswer(2)">查看参考答案</button>
+                        <div id="thinking-answer2" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>参考答案：</strong><br>
+                            当数据不满足高斯分布时，LDA性能会下降。例如，对于均匀分布的二维数据，如果两个类别的数据呈现重叠的矩形分布，LDA可能无法有效找到最佳的线性分离边界，导致分类准确率降低。此时可能需要考虑使用核方法或其他非线性降维技术。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 知识测验标签页 -->
+            <div id="quiz" class="tab-content">
+                <div class="section">
+                    <h2>📝 知识测验</h2>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quiz-progress"></div>
+                    </div>
+                    <p>进度: <span id="quiz-score">0</span>/5</p>
+                    
+                    <div class="quiz-container" id="quiz1">
+                        <div class="quiz-question">1. LDA的主要目标是什么？</div>
+                        <ul class="quiz-options">
+                            <li onclick="selectOption(this, false)">A. 最大化数据的总方差</li>
+                            <li onclick="selectOption(this, true)">B. 最大化类间距离，最小化类内距离</li>
+                            <li onclick="selectOption(this, false)">C. 最小化重构误差</li>
+                            <li onclick="selectOption(this, false)">D. 最大化数据的熵</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="quiz-container" id="quiz2">
+                        <div class="quiz-question">2. 对于C个类别的多分类问题，LDA最多可以降维到多少维？</div>
+                        <ul class="quiz-options">
+                            <li onclick="selectOption(this, false)">A. C维</li>
+                            <li onclick="selectOption(this, true)">B. C-1维</li>
+                            <li onclick="selectOption(this, false)">C. C+1维</li>
+                            <li onclick="selectOption(this, false)">D. 无限制</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="quiz-container" id="quiz3">
+                        <div class="quiz-question">3. LDA与PCA的主要区别是什么？</div>
+                        <ul class="quiz-options">
+                            <li onclick="selectOption(this, false)">A. LDA是无监督的，PCA是有监督的</li>
+                            <li onclick="selectOption(this, true)">B. LDA是有监督的，PCA是无监督的</li>
+                            <li onclick="selectOption(this, false)">C. 两者都是无监督的</li>
+                            <li onclick="selectOption(this, false)">D. 两者都是有监督的</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="quiz-container" id="quiz4">
+                        <div class="quiz-question">4. 在LDA中，类内散度矩阵Sw衡量的是什么？</div>
+                        <ul class="quiz-options">
+                            <li onclick="selectOption(this, false)">A. 不同类别之间的距离</li>
+                            <li onclick="selectOption(this, true)">B. 同一类别内样本的离散程度</li>
+                            <li onclick="selectOption(this, false)">C. 数据的总体方差</li>
+                            <li onclick="selectOption(this, false)">D. 投影后的方差</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="quiz-container" id="quiz5">
+                        <div class="quiz-question">5. 以下哪种情况下LDA可能表现不佳？</div>
+                        <ul class="quiz-options">
+                            <li onclick="selectOption(this, false)">A. 数据呈高斯分布</li>
+                            <li onclick="selectOption(this, false)">B. 类别数量较少</li>
+                            <li onclick="selectOption(this, true)">C. 数据呈非线性分布</li>
+                            <li onclick="selectOption(this, false)">D. 特征维度较高</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn" onclick="resetQuiz()">🔄 重新开始</button>
+                        <button class="btn" onclick="showQuizResults()">📊 查看结果</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentTab = 'theory';
+        let quizScore = 0;
+        let quizAnswered = 0;
+        let ldaChart = null;
+        
+        // 标签页切换
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有标签按钮的激活状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            // 如果切换到可视化标签页，初始化图表
+            if (tabName === 'visualization') {
+                setTimeout(initializeChart, 100);
+            }
+        }
+        
+        // 复制代码功能
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling.textContent;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                button.textContent = '已复制!';
+                setTimeout(() => {
+                    button.textContent = '复制';
+                }, 2000);
+            });
+        }
+        
+        // 填空题检查
+        function checkFillBlank(questionNum, correctAnswer) {
+            const userAnswer = document.getElementById(`fill${questionNum}`).value.trim();
+            const feedback = document.getElementById(`feedback${questionNum}`);
+            
+            if (userAnswer === correctAnswer) {
+                feedback.innerHTML = '<span style="color: #28a745; font-weight: bold;">✅ 正确！</span>';
+                feedback.style.background = '#d4edda';
+                feedback.style.padding = '10px';
+                feedback.style.borderRadius = '5px';
+            } else {
+                feedback.innerHTML = `<span style="color: #dc3545; font-weight: bold;">❌ 错误！</span><br>正确答案是: <code>${correctAnswer}</code>`;
+                feedback.style.background = '#f8d7da';
+                feedback.style.padding = '10px';
+                feedback.style.borderRadius = '5px';
+            }
+        }
+        
+        // 显示思考题答案
+        function showThinkingAnswer(questionNum) {
+            const answer = document.getElementById(`thinking-answer${questionNum}`);
+            if (answer.style.display === 'none') {
+                answer.style.display = 'block';
+                // 重新渲染MathJax
+                if (window.MathJax) {
+                    MathJax.typesetPromise([answer]);
+                }
+            } else {
+                answer.style.display = 'none';
+            }
+        }
+        
+        // 测验选项选择
+        function selectOption(element, isCorrect) {
+            const options = element.parentElement.querySelectorAll('li');
+            const quizContainer = element.closest('.quiz-container');
+            
+            // 如果已经回答过，不允许再次选择
+            if (quizContainer.dataset.answered === 'true') {
+                return;
+            }
+            
+            // 标记为已回答
+            quizContainer.dataset.answered = 'true';
+            quizAnswered++;
+            
+            // 清除之前的选择
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // 标记当前选择
+            element.classList.add('selected');
+            
+            // 显示正确答案
+            setTimeout(() => {
+                options.forEach(opt => {
+                    const optIsCorrect = opt.onclick.toString().includes('true');
+                    if (optIsCorrect) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                if (isCorrect) {
+                    quizScore++;
+                }
+                
+                updateQuizProgress();
+            }, 500);
+        }
+        
+        // 更新测验进度
+        function updateQuizProgress() {
+            const progress = (quizAnswered / 5) * 100;
+            document.getElementById('quiz-progress').style.width = progress + '%';
+            document.getElementById('quiz-score').textContent = quizScore;
+        }
+        
+        // 重置测验
+        function resetQuiz() {
+            quizScore = 0;
+            quizAnswered = 0;
+            
+            document.querySelectorAll('.quiz-container').forEach(container => {
+                container.dataset.answered = 'false';
+                container.querySelectorAll('li').forEach(option => {
+                    option.classList.remove('selected', 'correct', 'incorrect');
+                });
+            });
+            
+            updateQuizProgress();
+        }
+        
+        // 显示测验结果
+        function showQuizResults() {
+            const percentage = (quizScore / 5) * 100;
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = '🎉 优秀！你对LDA的理解很深入！';
+            } else if (percentage >= 60) {
+                message = '👍 良好！继续加油学习！';
+            } else {
+                message = '📚 需要加强！建议重新学习理论部分。';
+            }
+            
+            alert(`测验完成！\n得分：${quizScore}/5 (${percentage}%)\n${message}`);
+        }
+        
+        // 初始化图表
+        function initializeChart() {
+            const ctx = document.getElementById('ldaChart');
+            if (!ctx) return;
+            
+            if (ldaChart) {
+                ldaChart.destroy();
+            }
+            
+            ldaChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '类别 1',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                    }, {
+                        label: '类别 2',
+                        data: [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                    }, {
+                        label: '类别 3',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'LDA降维可视化结果'
+                        },
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'LD1'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'LD2'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 生成可视化数据
+        function generateVisualization() {
+            if (!ldaChart) return;
+            
+            const dataset = document.getElementById('dataset-select').value;
+            let data1, data2, data3;
+            
+            // 根据选择的数据集生成不同的模拟数据
+            switch(dataset) {
+                case 'iris':
+                    data1 = generateClusterData(50, -2, -1, 0.5);
+                    data2 = generateClusterData(50, 0, 1, 0.7);
+                    data3 = generateClusterData(50, 2, -0.5, 0.6);
+                    break;
+                case 'wine':
+                    data1 = generateClusterData(40, -1.5, 0, 0.8);
+                    data2 = generateClusterData(45, 1, 1.5, 0.6);
+                    data3 = generateClusterData(35, 0.5, -1.8, 0.7);
+                    break;
+                case 'synthetic':
+                    data1 = generateClusterData(60, -1, 2, 0.4);
+                    data2 = generateClusterData(55, 1.5, 0, 0.9);
+                    data3 = generateClusterData(50, -0.5, -1.5, 0.5);
+                    break;
+            }
+            
+            ldaChart.data.datasets[0].data = data1;
+            ldaChart.data.datasets[1].data = data2;
+            ldaChart.data.datasets[2].data = data3;
+            ldaChart.update();
+            
+            // 更新分析结果
+            updateAnalysisResults(data1.length + data2.length + data3.length);
+        }
+        
+        // 生成聚类数据
+        function generateClusterData(count, centerX, centerY, spread) {
+            const data = [];
+            for (let i = 0; i < count; i++) {
+                const x = centerX + (Math.random() - 0.5) * spread * 4;
+                const y = centerY + (Math.random() - 0.5) * spread * 4;
+                data.push({x: x, y: y});
+            }
+            return data;
+        }
+        
+        // 更新分析结果
+        function updateAnalysisResults(totalSamples) {
+            const dataset = document.getElementById('dataset-select').value;
+            const components = document.getElementById('components-slider').value;
+            
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <p><strong>📊 数据集:</strong> ${dataset === 'iris' ? '鸢尾花数据集' : dataset === 'wine' ? '红酒数据集' : '合成数据集'}</p>
+                <p><strong>📈 样本总数:</strong> ${totalSamples}</p>
+                <p><strong>🎯 降维维度:</strong> ${components}D</p>
+                <p><strong>🔍 分离效果:</strong> 良好 - 三个类别在LDA空间中呈现明显的聚类结构</p>
+                <p><strong>💡 建议:</strong> LDA成功地将高维数据投影到低维空间，同时保持了类别的可分性</p>
+            `;
+        }
+        
+        // 更新可视化
+        function updateVisualization() {
+            const components = document.getElementById('components-slider').value;
+            document.getElementById('components-value').textContent = components;
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+            
+            // 重置测验状态
+            resetQuiz();
+        });
+    </script>
+<script src="../ai-chatbot.js"></script>
+</body>
+</html>

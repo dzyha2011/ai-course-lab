@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能课程实验：回归分析教学平台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .nav-tab.active {
+            color: #007bff;
+            background: white;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #007bff;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin-bottom: 0.8rem;
+            font-size: 1.4rem;
+        }
+
+        .formula-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .code-container {
+            background: #2d3748;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #4a5568;
+            color: white;
+            padding: 0.8rem 1rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+
+        pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            color: #e2e8f0;
+            background: #2d3748;
+        }
+
+        .interactive-demo {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .control-group input, .control-group select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .quiz-question {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quiz-option {
+            padding: 0.8rem;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .quiz-option.selected {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .fill-blank {
+            display: inline-block;
+            min-width: 100px;
+            padding: 0.3rem 0.5rem;
+            border: 2px dashed #007bff;
+            border-radius: 4px;
+            background: #f8f9fa;
+            margin: 0 0.2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .demo-controls {
+                flex-direction: column;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .nav-tab {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页按钮 -->
+    <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    ">
+        <a href="../index.html" style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        " onmouseover="this.style.background='white'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='scale(1)'">
+            <span style="font-size: 18px;">←</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> 人工智能课程实验：回归分析</h1>
+            <p>交互式学习平台 - 理论与实践相结合</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('theory')">
+                <i class="fas fa-book"></i> 基础理论
+            </button>
+            <button class="nav-tab" onclick="showTab('simple-regression')">
+                <i class="fas fa-chart-scatter"></i> 简单线性回归
+            </button>
+            <button class="nav-tab" onclick="showTab('multiple-regression')">
+                <i class="fas fa-project-diagram"></i> 多元线性回归
+            </button>
+            <button class="nav-tab" onclick="showTab('evaluation')">
+                <i class="fas fa-calculator"></i> 模型评估
+            </button>
+            <button class="nav-tab" onclick="showTab('advanced')">
+                <i class="fas fa-image"></i> 图像恢复实例
+            </button>
+            <button class="nav-tab" onclick="showTab('quiz')">
+                <i class="fas fa-question-circle"></i> 互动测验
+            </button>
+        </div>
+
+        <div class="content">
+            <!-- 基础理论标签页 -->
+            <div id="theory" class="tab-content active">
+                <div class="section">
+                    <h2><i class="fas fa-lightbulb"></i> 回归分析基础理论</h2>
+                    
+                    <h3>1.1 回归分析的定义与类型</h3>
+                    <p>回归分析是一种统计建模方法，用于研究变量之间的因果关系，通过建立数学模型来预测因变量的值。</p>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>回归类型</th>
+                                    <th>数学表达式</th>
+                                    <th>应用场景</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>简单线性回归</strong></td>
+                                    <td>\(y = \beta_0 + \beta_1x + \epsilon\)</td>
+                                    <td>单个自变量与因变量的线性关系</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>多元线性回归</strong></td>
+                                    <td>\(y = \beta_0 + \beta_1x_1 + ... + \beta_nx_n + \epsilon\)</td>
+                                    <td>多个自变量与因变量的线性关系</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>非线性回归</strong></td>
+                                    <td>多项式、逻辑回归等</td>
+                                    <td>变量间存在非线性关系</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>1.2 最小二乘法原理</h3>
+                    <div class="formula-box">
+                        <p><strong>残差平方和（RSS）：</strong></p>
+                        <p>$$RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 = \sum_{i=1}^{n}(y_i - (\beta_0 + \beta_1x_i))^2$$</p>
+                        
+                        <p><strong>参数估计公式：</strong></p>
+                        <p>$$\hat{\beta}_1 = \frac{n\sum x_iy_i - (\sum x_i)(\sum y_i)}{n\sum x_i^2 - (\sum x_i)^2}$$</p>
+                        <p>$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x}$$</p>
+                    </div>
+
+                    <h3>1.3 Python 常用库介绍</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>库名</th>
+                                    <th>核心功能</th>
+                                    <th>典型应用场景</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>NumPy</strong></td>
+                                    <td>数值计算、矩阵运算</td>
+                                    <td>数据预处理、参数计算</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pandas</strong></td>
+                                    <td>数据清洗、特征工程</td>
+                                    <td>数据集加载与处理</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Scikit-learn</strong></td>
+                                    <td>机器学习模型实现</td>
+                                    <td>线性回归、正则化模型</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Matplotlib/Seaborn</strong></td>
+                                    <td>数据可视化</td>
+                                    <td>绘制散点图、残差图</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> 提示：</strong>
+                        在实际应用中，建议结合使用多个库来完成完整的回归分析流程。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 简单线性回归标签页 -->
+            <div id="simple-regression" class="tab-content">
+                <div class="section">
+                    <h2><i class="fas fa-chart-scatter"></i> 简单线性回归实验</h2>
+                    
+                    <h3>实验目的</h3>
+                    <ul>
+                        <li>掌握简单线性回归模型的构建流程</li>
+                        <li>理解最小二乘法的参数估计原理</li>
+                        <li>学会使用 Scikit-learn 实现回归分析</li>
+                    </ul>
+
+                    <h3>交互式演示</h3>
+                    <div class="interactive-demo">
+                        <h4>线性回归参数调节</h4>
+                        <div class="demo-controls">
+                            <div class="control-group">
+                                <label for="slope">斜率 (β₁):</label>
+                                <input type="range" id="slope" min="-5" max="5" step="0.1" value="1" oninput="updateSimpleRegression()">
+                                <span id="slope-value">1.0</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="intercept">截距 (β₀):</label>
+                                <input type="range" id="intercept" min="-10" max="10" step="0.1" value="0" oninput="updateSimpleRegression()">
+                                <span id="intercept-value">0.0</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="noise">噪声水平:</label>
+                                <input type="range" id="noise" min="0" max="2" step="0.1" value="0.5" oninput="updateSimpleRegression()">
+                                <span id="noise-value">0.5</span>
+                            </div>
+                        </div>
+                        <div id="simple-regression-plot" style="height: 400px;"></div>
+                        <div id="regression-equation" class="formula-box">
+                            <strong>当前回归方程：</strong> y = <span id="eq-intercept">0.0</span> + <span id="eq-slope">1.0</span>x
+                        </div>
+                    </div>
+
+                    <h3>代码实现</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Python 代码示例</span>
+                            <button class="copy-btn" onclick="copyCode('simple-code')">复制代码</button>
+                        </div>
+                        <pre><code id="simple-code"># 简单线性回归实现
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_diabetes
+
+# 加载数据
+data = load_diabetes()
+X = data.data[:, 2].reshape(-1, 1)  # 取第3个特征（体重指数）
+y = data.target
+
+# 数据划分
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 模型训练
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 预测
+y_pred = model.predict(X_test)
+
+# 输出参数
+print(f"系数 (β₁): {model.coef_[0]:.2f}")
+print(f"截距 (β₀): {model.intercept_:.2f}")
+print(f"回归方程: y = {model.intercept_:.2f} + {model.coef_[0]:.2f}x")
+
+# 可视化
+plt.scatter(X_test, y_test, color='blue', alpha=0.5, label='测试数据')
+plt.plot(X_test, y_pred, color='red', linewidth=2, label='回归线')
+plt.xlabel('体重指数 (BMI)')
+plt.ylabel('疾病进展指标')
+plt.title('简单线性回归结果')
+plt.legend()
+plt.show()</code></pre>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-exclamation-triangle"></i> 注意：</strong>
+                        在实际应用中，需要检查线性回归的假设条件是否满足，包括线性性、独立性、同方差性和正态性。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 多元线性回归标签页 -->
+            <div id="multiple-regression" class="tab-content">
+                <div class="section">
+                    <h2><i class="fas fa-project-diagram"></i> 多元线性回归实验</h2>
+                    
+                    <h3>实验目的</h3>
+                    <ul>
+                        <li>掌握多特征回归模型的构建方法</li>
+                        <li>理解特征相关性对模型的影响</li>
+                        <li>学会评估多元回归模型的性能</li>
+                    </ul>
+
+                    <h3>特征相关性分析</h3>
+                    <div class="interactive-demo">
+                        <h4>多元回归参数设置</h4>
+                        <div class="demo-controls">
+                            <div class="control-group">
+                                <label for="test-ratio">测试集比例:</label>
+                                <input type="range" id="test-ratio" min="0.1" max="0.5" step="0.05" value="0.3" oninput="updateMultipleRegression()">
+                                <span id="test-ratio-value">0.30</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="feature-count">特征数量:</label>
+                                <input type="range" id="feature-count" min="2" max="10" step="1" value="5" oninput="updateMultipleRegression()">
+                                <span id="feature-count-value">5</span>
+                            </div>
+                            <button class="btn" onclick="generateMultipleRegressionData()">生成新数据</button>
+                        </div>
+                        <div id="multiple-regression-plot" style="height: 400px;"></div>
+                        <div id="multiple-regression-results" class="formula-box">
+                            <strong>模型性能指标：</strong>
+                            <div id="performance-metrics"></div>
+                        </div>
+                    </div>
+
+                    <h3>代码实现</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>多元线性回归代码</span>
+                            <button class="copy-btn" onclick="copyCode('multiple-code')">复制代码</button>
+                        </div>
+                        <pre><code id="multiple-code"># 多元线性回归实现
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_boston
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 加载波士顿房价数据集
+data = load_boston()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = data.target
+
+# 特征相关性分析
+corr = X.corr()
+plt.figure(figsize=(12, 10))
+sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('特征相关性矩阵')
+plt.show()
+
+# 数据划分
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 模型训练
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 预测与评估
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"均方误差 (MSE): {mse:.2f}")
+print(f"决定系数 (R²): {r2:.2f}")
+
+# 特征重要性分析
+coef = pd.Series(model.coef_, index=X.columns)
+coef.sort_values().plot(kind='barh', figsize=(10, 8))
+plt.title('特征系数（重要性）')
+plt.xlabel('回归系数')
+plt.show()</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模型评估标签页 -->
+            <div id="evaluation" class="tab-content">
+                <div class="section">
+                    <h2><i class="fas fa-calculator"></i> 回归模型评估与改进</h2>
+                    
+                    <h3>常用评估指标</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>指标</th>
+                                    <th>公式</th>
+                                    <th>意义</th>
+                                    <th>取值范围</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>均方误差（MSE）</strong></td>
+                                    <td>\(MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2\)</td>
+                                    <td>衡量预测值与真实值的平均平方误差</td>
+                                    <td>[0, +∞)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>均方根误差（RMSE）</strong></td>
+                                    <td>\(RMSE = \sqrt{MSE}\)</td>
+                                    <td>与目标变量同量纲，更直观</td>
+                                    <td>[0, +∞)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>平均绝对误差（MAE）</strong></td>
+                                    <td>\(MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|\)</td>
+                                    <td>对异常值更稳健</td>
+                                    <td>[0, +∞)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>决定系数（R²）</strong></td>
+                                    <td>\(R^2 = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}\)</td>
+                                    <td>模型解释因变量变异的比例</td>
+                                    <td>(-∞, 1]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>交互式评估工具</h3>
+                    <div class="interactive-demo">
+                        <h4>模型性能比较</h4>
+                        <div class="demo-controls">
+                            <div class="control-group">
+                                <label for="model-type">模型类型:</label>
+                                <select id="model-type" onchange="updateEvaluation()">
+                                    <option value="linear">线性回归</option>
+                                    <option value="ridge">Ridge回归</option>
+                                    <option value="lasso">Lasso回归</option>
+                                    <option value="polynomial">多项式回归</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="alpha-param">正则化参数 α:</label>
+                                <input type="range" id="alpha-param" min="0.01" max="10" step="0.01" value="1" oninput="updateEvaluation()">
+                                <span id="alpha-value">1.00</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="poly-degree">多项式度数:</label>
+                                <input type="range" id="poly-degree" min="1" max="5" step="1" value="2" oninput="updateEvaluation()">
+                                <span id="poly-degree-value">2</span>
+                            </div>
+                        </div>
+                        <div id="evaluation-plot" style="height: 400px;"></div>
+                        <div id="evaluation-metrics" class="formula-box">
+                            <div id="metrics-display"></div>
+                        </div>
+                    </div>
+
+                    <h3>模型改进方法</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>正则化与特征工程</span>
+                            <button class="copy-btn" onclick="copyCode('improvement-code')">复制代码</button>
+                        </div>
+                        <pre><code id="improvement-code"># 模型改进示例
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+
+# 1. Ridge回归（L2正则化）
+ridge = Ridge(alpha=1.0)
+ridge.fit(X_train, y_train)
+ridge_pred = ridge.predict(X_test)
+ridge_r2 = r2_score(y_test, ridge_pred)
+
+# 2. Lasso回归（L1正则化，特征选择）
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+lasso_pred = lasso.predict(X_test)
+lasso_r2 = r2_score(y_test, lasso_pred)
+
+# 3. 多项式特征
+poly_features = PolynomialFeatures(degree=2)
+X_poly = poly_features.fit_transform(X)
+X_train_poly, X_test_poly, y_train, y_test = train_test_split(X_poly, y, test_size=0.3, random_state=42)
+
+poly_model = LinearRegression()
+poly_model.fit(X_train_poly, y_train)
+poly_pred = poly_model.predict(X_test_poly)
+poly_r2 = r2_score(y_test, poly_pred)
+
+# 4. 特征选择
+selector = SelectKBest(f_regression, k=5)
+X_selected = selector.fit_transform(X, y)
+X_train_sel, X_test_sel, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)
+
+select_model = LinearRegression()
+select_model.fit(X_train_sel, y_train)
+select_pred = select_model.predict(X_test_sel)
+select_r2 = r2_score(y_test, select_pred)
+
+# 5. 交叉验证
+cv_scores = cross_val_score(LinearRegression(), X, y, cv=5, scoring='r2')
+print(f"交叉验证 R² 分数: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+
+# 结果比较
+print(f"线性回归 R²: {r2:.3f}")
+print(f"Ridge回归 R²: {ridge_r2:.3f}")
+print(f"Lasso回归 R²: {lasso_r2:.3f}")
+print(f"多项式回归 R²: {poly_r2:.3f}")
+print(f"特征选择回归 R²: {select_r2:.3f}")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图像恢复实例标签页 -->
+            <div id="advanced" class="tab-content">
+                <div class="section">
+                    <h2><i class="fas fa-image"></i> 基于回归分析的图像恢复</h2>
+                    
+                    <h3>实验背景</h3>
+                    <p>图像在传输或存储过程中易受噪声干扰，本实验通过<strong>区域二元线性回归模型</strong>预测噪声点像素值，实现图像去噪恢复。</p>
+
+                    <h3>实验原理</h3>
+                    <ol>
+                        <li><strong>噪声生成：</strong>通过随机掩码将图像部分像素置零（噪声比率：0.4/0.6/0.8）</li>
+                        <li><strong>区域回归：</strong>对每个噪声点，利用其周围邻域像素训练线性回归模型</li>
+                        <li><strong>误差评估：</strong>使用恢复图像与原始图像的2-范数衡量恢复效果</li>
+                    </ol>
+
+                    <div class="formula-box">
+                        <p><strong>恢复误差计算：</strong></p>
+                        <p>$$error = \| R(:) - I(:) \|_2$$</p>
+                        <p>其中 R 为恢复图像，I 为原始图像</p>
+                    </div>
+
+                    <h3>交互式图像恢复演示</h3>
+                    <div class="interactive-demo">
+                        <h4>图像上传与处理</h4>
+                        <div class="demo-controls">
+                            <div class="control-group">
+                                <label for="image-upload">选择图像文件:</label>
+                                <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
+                                <button class="btn btn-success" onclick="document.getElementById('image-upload').click()">
+                                    <i class="fas fa-upload"></i> 上传图片
+                                </button>
+                            </div>
+                            <div class="control-group">
+                                <label for="noise-ratio">噪声比率:</label>
+                                <input type="range" id="noise-ratio" min="0.1" max="0.8" step="0.1" value="0.4" oninput="updateImageParams()">
+                                <span id="noise-ratio-value">0.4</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="region-size">邻域大小:</label>
+                                <input type="range" id="region-size" min="2" max="8" step="1" value="4" oninput="updateImageParams()">
+                                <span id="region-size-value">4</span>
+                            </div>
+                            <div class="control-group">
+                                <button class="btn" onclick="addNoiseToImage()" id="add-noise-btn" disabled>
+                                    <i class="fas fa-random"></i> 添加噪声
+                                </button>
+                                <button class="btn btn-warning" onclick="restoreImage()" id="restore-btn" disabled>
+                                    <i class="fas fa-magic"></i> 恢复图像
+                                </button>
+                                <button class="btn btn-success" onclick="downloadImage()" id="download-btn" disabled>
+                                    <i class="fas fa-download"></i> 下载恢复图像
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="image-display-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+                            <div class="image-panel">
+                                <h4>原始图像</h4>
+                                <canvas id="original-canvas" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;"></canvas>
+                            </div>
+                            <div class="image-panel">
+                                <h4>噪声图像</h4>
+                                <canvas id="noise-canvas" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;"></canvas>
+                            </div>
+                            <div class="image-panel">
+                                <h4>恢复图像</h4>
+                                <canvas id="restored-canvas" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div id="restoration-results" class="formula-box" style="display: none;">
+                            <h4>恢复结果分析</h4>
+                            <div id="restoration-metrics"></div>
+                            <div id="processing-time"></div>
+                        </div>
+                    </div>
+
+                    <h3>完整代码实现</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>图像恢复算法</span>
+                            <button class="copy-btn" onclick="copyCode('restoration-code')">复制代码</button>
+                        </div>
+                        <pre><code id="restoration-code"># 基于回归分析的图像恢复
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+def read_image(img_path):
+    """读取并预处理图像"""
+    img = cv2.imread(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    return img.astype(np.double) / 255.0  # 归一化到[0,1]
+
+def noise_mask_image(img, noise_ratio):
+    """生成受损图像"""
+    noise_img = np.copy(img)
+    h, w, c = img.shape
+    
+    for i in range(c):
+        for j in range(h):
+            # 生成噪声掩码
+            mask = np.random.choice([0, 1], size=w, 
+                                  p=[noise_ratio, 1-noise_ratio])
+            noise_img[j, mask == 0, i] = 0  # 噪声点置零
+    
+    return noise_img
+
+def restore_image(noise_img, size=4):
+    """使用线性回归恢复图像"""
+    res_img = np.copy(noise_img)
+    noise_mask = (noise_img == 0).astype(np.double)
+    h, w, c = noise_img.shape
+    
+    for row in range(h):
+        for col in range(w):
+            for chan in range(c):
+                if noise_mask[row, col, chan] == 0:  # 非噪声点跳过
+                    continue
+                
+                # 获取邻域区域
+                rowl = max(0, row - size)
+                rowr = min(h, row + size + 1)
+                coll = max(0, col - size)
+                colr = min(w, col + size + 1)
+                
+                # 提取邻域非噪声点作为训练数据
+                neighbors = noise_img[rowl:rowr, coll:colr, chan]
+                mask = noise_mask[rowl:rowr, coll:colr, chan] == 0
+                
+                if np.sum(mask) == 0:  # 没有有效邻域点
+                    continue
+                
+                # 获取坐标和像素值
+                coords = np.argwhere(mask)
+                values = neighbors[mask].reshape(-1, 1)
+                
+                if len(coords) < 2:  # 数据点太少
+                    continue
+                
+                # 训练线性回归模型
+                model = LinearRegression()
+                model.fit(coords, values)
+                
+                # 预测当前像素值
+                target_coord = np.array([[row - rowl, col - coll]])
+                predicted_value = model.predict(target_coord)[0, 0]
+                
+                # 限制像素值范围
+                res_img[row, col, chan] = np.clip(predicted_value, 0, 1)
+    
+    return res_img
+
+def compute_error(res_img, original_img):
+    """计算恢复误差"""
+    return np.linalg.norm(res_img.flatten() - original_img.flatten())
+
+# 主程序
+if __name__ == "__main__":
+    # 读取图像
+    original_img = read_image("sample_image.jpg")
+    
+    # 测试不同噪声比率
+    noise_ratios = [0.4, 0.6, 0.8]
+    region_sizes = [2, 4, 6, 8]
+    
+    results = []
+    
+    for noise_ratio in noise_ratios:
+        for region_size in region_sizes:
+            # 生成噪声图像
+            noise_img = noise_mask_image(original_img, noise_ratio)
+            
+            # 恢复图像
+            restored_img = restore_image(noise_img, region_size)
+            
+            # 计算误差
+            error = compute_error(restored_img, original_img)
+            
+            results.append({
+                'noise_ratio': noise_ratio,
+                'region_size': region_size,
+                'error': error
+            })
+            
+            print(f"噪声比率: {noise_ratio}, 邻域大小: {region_size}, 恢复误差: {error:.4f}")
+    
+    # 可视化结果
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    
+    # 显示原始图像、噪声图像和恢复图像
+    noise_img = noise_mask_image(original_img, 0.6)
+    restored_img = restore_image(noise_img, 4)
+    
+    axes[0, 0].imshow(original_img)
+    axes[0, 0].set_title('原始图像')
+    axes[0, 0].axis('off')
+    
+    axes[0, 1].imshow(noise_img)
+    axes[0, 1].set_title('噪声图像 (60%)')
+    axes[0, 1].axis('off')
+    
+    axes[0, 2].imshow(restored_img)
+    axes[0, 2].set_title('恢复图像')
+    axes[0, 2].axis('off')
+    
+    # 显示误差分析
+    import pandas as pd
+    df = pd.DataFrame(results)
+    
+    for i, noise_ratio in enumerate(noise_ratios):
+        subset = df[df['noise_ratio'] == noise_ratio]
+        axes[1, i].plot(subset['region_size'], subset['error'], 'o-')
+        axes[1, i].set_title(f'噪声比率 {noise_ratio}')
+        axes[1, i].set_xlabel('邻域大小')
+        axes[1, i].set_ylabel('恢复误差')
+        axes[1, i].grid(True)
+    
+    plt.tight_layout()
+    plt.show()</code></pre>
+                    </div>
+
+                    <h3>思考题</h3>
+                    <div class="alert alert-info">
+                        <h4><i class="fas fa-question-circle"></i> 深入思考</h4>
+                        <ol>
+                            <li><strong>噪声比率影响：</strong>当噪声比率从0.4增加到0.8时，恢复误差如何变化？为什么？</li>
+                            <li><strong>邻域大小选择：</strong>过大或过小的邻域会导致什么问题？如何确定最优size？</li>
+                            <li><strong>模型改进：</strong>除了线性回归，还可以使用哪些模型提升恢复效果？</li>
+                            <li><strong>计算优化：</strong>如何通过向量化或并行计算优化算法效率？</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 互动测验标签页 -->
+            <div id="quiz" class="tab-content">
+                <div class="section">
+                    <h2><i class="fas fa-question-circle"></i> 互动测验与练习</h2>
+                    
+                    <h3>选择题测验</h3>
+                    <div class="quiz-container">
+                        <div class="quiz-question">
+                            <h4>1. 在简单线性回归中，最小二乘法的目标是：</h4>
+                            <div class="quiz-options">
+                                <div class="quiz-option" onclick="selectOption(this, 'q1', 'A')">
+                                    A. 最小化残差平方和
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q1', 'B')">
+                                    B. 最大化相关系数
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q1', 'C')">
+                                    C. 最小化绝对误差
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q1', 'D')">
+                                    D. 最大化决定系数
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quiz-question">
+                            <h4>2. R²（决定系数）的取值范围是：</h4>
+                            <div class="quiz-options">
+                                <div class="quiz-option" onclick="selectOption(this, 'q2', 'A')">
+                                    A. [0, 1]
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q2', 'B')">
+                                    B. (-∞, 1]
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q2', 'C')">
+                                    C. [0, +∞)
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q2', 'D')">
+                                    D. [-1, 1]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quiz-question">
+                            <h4>3. Lasso回归相比Ridge回归的主要优势是：</h4>
+                            <div class="quiz-options">
+                                <div class="quiz-option" onclick="selectOption(this, 'q3', 'A')">
+                                    A. 计算速度更快
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q3', 'B')">
+                                    B. 可以实现特征选择
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q3', 'C')">
+                                    C. 对异常值更稳健
+                                </div>
+                                <div class="quiz-option" onclick="selectOption(this, 'q3', 'D')">
+                                    D. 预测精度更高
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success" onclick="checkQuizAnswers()">提交答案</button>
+                        <div id="quiz-result"></div>
+                    </div>
+
+                    <h3>代码填空练习</h3>
+                    <div class="quiz-container">
+                        <h4>完成以下线性回归代码：</h4>
+                        <div class="code-container">
+                            <pre><code># 导入必要的库
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 数据划分
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<input type="text" class="fill-blank" id="blank1" placeholder="0.2">, random_state=42)
+
+# 模型初始化与训练
+model = <input type="text" class="fill-blank" id="blank2" placeholder="LinearRegression()">
+model.<input type="text" class="fill-blank" id="blank3" placeholder="fit">(X_train, y_train)
+
+# 预测与评估
+y_pred = model.predict(X_test)
+mse = mean_squared_error(<input type="text" class="fill-blank" id="blank4" placeholder="y_test">, <input type="text" class="fill-blank" id="blank5" placeholder="y_pred">)
+r2 = r2_score(y_test, y_pred)
+
+# 输出结果
+print(f"系数: {model.<input type="text" class="fill-blank" id="blank6" placeholder="coef_">}")
+print(f"截距: {model.<input type="text" class="fill-blank" id="blank7" placeholder="intercept_">}")</code></pre>
+                        </div>
+                        <button class="btn btn-warning" onclick="checkFillBlanks()">检查答案</button>
+                        <div id="fill-blank-result"></div>
+                    </div>
+
+                    <h3>学习进度</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="learning-progress" style="width: 0%"></div>
+                    </div>
+                    <p id="progress-text">完成度: 0%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CDN 可用性检测
+        const hasPlotly = typeof Plotly !== 'undefined';
+        const hasMathJax = typeof MathJax !== 'undefined';
+
+        if (!hasPlotly) {
+            console.warn('Plotly CDN 加载失败，将使用Canvas备用图表');
+        }
+
+        // 全局变量
+        let quizAnswers = {};
+        let currentProgress = 0;
+        let chartRenderQueue = {}; // 跟踪待渲染的图表
+
+        // 标签页切换
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            const activeTab = document.querySelector('[onclick="showTab(\'' + tabName + '\')"]');
+            if (activeTab) activeTab.classList.add('active');
+
+            // 切换到可见标签后重绘图表（修复隐藏容器尺寸为0的问题）
+            setTimeout(function() {
+                if (tabName === 'simple-regression') updateSimpleRegression();
+                else if (tabName === 'multiple-regression') updateMultipleRegression();
+                else if (tabName === 'evaluation') updateEvaluation();
+            }, 100);
+
+            // 重新渲染MathJax
+            if (hasMathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // 复制代码功能
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                alert('代码已复制到剪贴板！');
+            });
+        }
+
+        // Canvas 备用绘图（Plotly不可用时使用）
+        function drawCanvasChart(canvasId, data, labels) {
+            var canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                // 创建canvas替换plot div
+                var plotDiv = document.getElementById(canvasId.replace('-canvas',''));
+                if (!plotDiv) return;
+                plotDiv.innerHTML = '';
+                canvas = document.createElement('canvas');
+                canvas.id = canvasId;
+                canvas.style.width = '100%';
+                canvas.style.height = '400px';
+                plotDiv.appendChild(canvas);
+            }
+            var containerWidth = canvas.parentElement.clientWidth;
+            canvas.width = Math.min(containerWidth - 20, 700);
+            canvas.height = 380;
+            var ctx = canvas.getContext('2d');
+            var W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            // 简单绘制
+            var margin = { top: 40, right: 30, bottom: 50, left: 60 };
+            var pw = W - margin.left - margin.right;
+            var ph = H - margin.top - margin.bottom;
+
+            // 背景
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, W, H);
+
+            // 坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + ph);
+            ctx.lineTo(margin.left + pw, margin.top + ph);
+            ctx.stroke();
+
+            // 标题
+            ctx.fillStyle = '#333';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(labels.title || '图表', W/2, 25);
+
+            // 轴标签
+            ctx.fillText(labels.x || 'X', W/2, H - 8);
+            ctx.save();
+            ctx.translate(14, margin.top + ph/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText(labels.y || 'Y', 0, 0);
+            ctx.restore();
+
+            // 无数据提示
+            ctx.fillStyle = '#999';
+            ctx.font = '13px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('CDN图表加载失败，显示为简图', W/2, H/2);
+            ctx.fillText('请检查网络连接后刷新页面', W/2, H/2 + 24);
+        }
+
+        // 简单线性回归交互演示
+        function updateSimpleRegression() {
+            var slope = parseFloat(document.getElementById('slope').value);
+            var intercept = parseFloat(document.getElementById('intercept').value);
+            var noise = parseFloat(document.getElementById('noise').value);
+
+            document.getElementById('slope-value').textContent = slope.toFixed(1);
+            document.getElementById('intercept-value').textContent = intercept.toFixed(1);
+            document.getElementById('noise-value').textContent = noise.toFixed(1);
+            document.getElementById('eq-slope').textContent = slope.toFixed(2);
+            document.getElementById('eq-intercept').textContent = intercept.toFixed(2);
+
+            var x = [], y = [], y_line = [];
+            for (var i = 0; i < 50; i++) {
+                var xi = (i - 25) / 5;
+                var yi = intercept + slope * xi + (Math.random() - 0.5) * noise * 2;
+                var yi_line = intercept + slope * xi;
+                x.push(xi);
+                y.push(yi);
+                y_line.push(yi_line);
+            }
+
+            if (hasPlotly) {
+                var container = document.getElementById('simple-regression-plot');
+                if (container && container.clientHeight === 0) return; // 容器不可见，等待tab切换重绘
+                var trace1 = { x: x, y: y, mode: 'markers', type: 'scatter', name: '数据点', marker: { color: 'blue', size: 8, opacity: 0.6 } };
+                var trace2 = { x: x, y: y_line, mode: 'lines', type: 'scatter', name: '回归线', line: { color: 'red', width: 3 } };
+                var layout = { title: '简单线性回归演示', xaxis: { title: 'X' }, yaxis: { title: 'Y' }, showlegend: true };
+                Plotly.newPlot('simple-regression-plot', [trace1, trace2], layout);
+            } else {
+                drawCanvasChart('simple-regression-canvas', null, { title: '简单线性回归', x: 'X', y: 'Y' });
+            }
+        }
+
+        // 多元线性回归演示
+        function updateMultipleRegression() {
+            var testRatio = parseFloat(document.getElementById('test-ratio').value);
+            var featureCount = parseInt(document.getElementById('feature-count').value);
+            document.getElementById('test-ratio-value').textContent = testRatio.toFixed(2);
+            document.getElementById('feature-count-value').textContent = featureCount;
+            generateMultipleRegressionData();
+        }
+
+        function generateMultipleRegressionData() {
+            var n = 100;
+            var featureCount = parseInt(document.getElementById('feature-count').value);
+            var mse = 2.5 + Math.random() * 2;
+            var r2 = 0.7 + Math.random() * 0.25;
+            var rmse = Math.sqrt(mse);
+            var mae = mse * 0.8;
+
+            document.getElementById('performance-metrics').innerHTML =
+                '<p><strong>MSE:</strong> ' + mse.toFixed(3) + '</p>' +
+                '<p><strong>RMSE:</strong> ' + rmse.toFixed(3) + '</p>' +
+                '<p><strong>MAE:</strong> ' + mae.toFixed(3) + '</p>' +
+                '<p><strong>R²:</strong> ' + r2.toFixed(3) + '</p>';
+
+            var features = [], coefficients = [];
+            for (var i = 0; i < featureCount; i++) {
+                features.push('特征' + (i+1));
+                coefficients.push((Math.random() - 0.5) * 4);
+            }
+
+            if (hasPlotly) {
+                var container = document.getElementById('multiple-regression-plot');
+                if (container && container.clientHeight === 0) return;
+                var trace = { x: coefficients, y: features, type: 'bar', orientation: 'h', marker: { color: 'steelblue' } };
+                var layout = { title: '特征重要性（回归系数）', xaxis: { title: '系数值' }, yaxis: { title: '特征' }, margin: { l: 100 } };
+                Plotly.newPlot('multiple-regression-plot', [trace], layout);
+            } else {
+                drawCanvasChart('multiple-regression-canvas', null, { title: '特征重要性', x: '系数值', y: '特征' });
+            }
+        }
+
+        // 模型评估演示
+        function updateEvaluation() {
+            var modelType = document.getElementById('model-type').value;
+            var alpha = parseFloat(document.getElementById('alpha-param').value);
+            var polyDegree = parseInt(document.getElementById('poly-degree').value);
+
+            document.getElementById('alpha-value').textContent = alpha.toFixed(2);
+            document.getElementById('poly-degree-value').textContent = polyDegree;
+
+            var mse, r2;
+            switch(modelType) {
+                case 'linear': mse = 2.5; r2 = 0.75; break;
+                case 'ridge': mse = 2.3 + alpha * 0.1; r2 = 0.78 - alpha * 0.02; break;
+                case 'lasso': mse = 2.4 + alpha * 0.15; r2 = 0.76 - alpha * 0.03; break;
+                case 'polynomial': mse = 2.0 + (polyDegree - 2) * 0.3; r2 = 0.80 - (polyDegree - 2) * 0.05; break;
+                default: mse = 2.5; r2 = 0.75;
+            }
+            var mae = mse * 0.8, rmse = Math.sqrt(mse);
+
+            document.getElementById('metrics-display').innerHTML =
+                '<h4>模型: ' + modelType.toUpperCase() + '</h4>' +
+                '<p><strong>MSE:</strong> ' + mse.toFixed(3) + '</p>' +
+                '<p><strong>RMSE:</strong> ' + rmse.toFixed(3) + '</p>' +
+                '<p><strong>MAE:</strong> ' + mae.toFixed(3) + '</p>' +
+                '<p><strong>R²:</strong> ' + r2.toFixed(3) + '</p>';
+
+            var x = [], y_true = [], y_pred = [];
+            for (var i = 0; i < 50; i++) {
+                var xi = i / 10;
+                var yi_true = 2 + 1.5 * xi + (Math.random() - 0.5) * 0.5;
+                var yi_pred = yi_true + (Math.random() - 0.5) * Math.sqrt(mse) * 0.5;
+                x.push(xi); y_true.push(yi_true); y_pred.push(yi_pred);
+            }
+
+            if (hasPlotly) {
+                var container = document.getElementById('evaluation-plot');
+                if (container && container.clientHeight === 0) return;
+                var trace1 = { x: y_true, y: y_pred, mode: 'markers', type: 'scatter', name: '预测 vs 真实', marker: { color: 'blue', size: 8, opacity: 0.6 } };
+                var trace2 = { x: [Math.min.apply(null,y_true), Math.max.apply(null,y_true)], y: [Math.min.apply(null,y_true), Math.max.apply(null,y_true)], mode: 'lines', type: 'scatter', name: '理想预测线', line: { color: 'red', dash: 'dash' } };
+                var layout = { title: '预测值 vs 真实值', xaxis: { title: '真实值' }, yaxis: { title: '预测值' }, showlegend: true };
+                Plotly.newPlot('evaluation-plot', [trace1, trace2], layout);
+            } else {
+                drawCanvasChart('evaluation-canvas', null, { title: '预测vs真实', x: '真实值', y: '预测值' });
+            }
+        }
+
+        // 测验功能 - 选择题
+        function selectOption(el, qid, choice) {
+            // 清除同题的旧选择
+            var siblings = el.parentElement.querySelectorAll('.quiz-option');
+            siblings.forEach(function(s) { s.classList.remove('selected'); });
+            el.classList.add('selected');
+            quizAnswers[qid] = choice;
+        }
+
+        function checkQuizAnswers() {
+            var correctAnswers = { q1: 'A', q2: 'B', q3: 'B' };
+            var explanations = {
+                q1: '最小二乘法通过最小化残差平方和（RSS）来估计回归参数。',
+                q2: 'R²取值范围是(-∞, 1]，当模型拟合极差时可能出现负值。',
+                q3: 'Lasso使用L1正则化可以将不重要特征的系数压缩为0，实现特征选择。'
+            };
+            var questions = document.querySelectorAll('.quiz-question');
+            var score = 0;
+            questions.forEach(function(q, i) {
+                var qid = 'q' + (i + 1);
+                var selected = quizAnswers[qid];
+                var options = q.querySelectorAll('.quiz-option');
+                options.forEach(function(opt) {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                if (selected === correctAnswers[qid]) {
+                    score++;
+                    var selEl = q.querySelector('.quiz-option.selected');
+                    if (selEl) selEl.classList.add('correct');
+                } else if (selected) {
+                    var selEl = q.querySelector('.quiz-option.selected');
+                    if (selEl) selEl.classList.add('incorrect');
+                    // 高亮正确答案
+                    options.forEach(function(opt) {
+                        if (opt.textContent.trim().startsWith(correctAnswers[qid] + '.')) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                }
+            });
+            document.getElementById('quiz-result').innerHTML =
+                '<h3>测验结果: ' + score + '/' + questions.length + '</h3>' +
+                '<p>得分率: ' + (score/questions.length*100).toFixed(1) + '%</p>' +
+                '<div style="margin-top:10px;font-size:0.9em;">' +
+                Object.keys(explanations).map(function(k) {
+                    return '<p><strong>' + k.toUpperCase() + ':</strong> ' + explanations[k] + '</p>';
+                }).join('') + '</div>';
+            // 更新进度
+            if (score === questions.length) addProgress(25);
+        }
+
+        // 填空检查
+        function checkFillBlanks() {
+            var blanks = {
+                blank1: '0.2', blank2: 'LinearRegression()', blank3: 'fit',
+                blank4: 'y_test', blank5: 'y_pred', blank6: 'coef_', blank7: 'intercept_'
+            };
+            var score = 0;
+            var total = Object.keys(blanks).length;
+            for (var id in blanks) {
+                var el = document.getElementById(id);
+                if (!el) continue;
+                var userAnswer = el.value.trim();
+                if (userAnswer.toLowerCase() === blanks[id].toLowerCase()) {
+                    el.style.borderColor = '#28a745';
+                    el.style.background = '#d4edda';
+                    score++;
+                } else {
+                    el.style.borderColor = '#dc3545';
+                    el.style.background = '#f8d7da';
+                }
+            }
+            document.getElementById('fill-blank-result').innerHTML =
+                '<h4>填空结果: ' + score + '/' + total + '</h4>' +
+                '<p style="margin-top:5px;">' + (score === total ? '全部正确！' : '红色标记处需要修改，请检查后再试。') + '</p>';
+            if (score >= Math.ceil(total * 0.7)) addProgress(15);
+        }
+
+        // 进度追踪
+        function addProgress(points) {
+            currentProgress = Math.min(100, currentProgress + points);
+            document.getElementById('learning-progress').style.width = currentProgress + '%';
+            document.getElementById('progress-text').textContent = '完成度: ' + currentProgress + '%';
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('theory');
+            // 延迟初始化首屏图表（确保容器已渲染）
+            setTimeout(function() {
+                updateSimpleRegression();
+                updateMultipleRegression();
+                updateEvaluation();
+            }, 200);
+
+            // MathJax配置
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                }
+            };
+        });
+
+        // 更新图像参数显示
+        function updateImageParams() {
+            const noiseRatio = parseFloat(document.getElementById('noise-ratio').value);
+            const regionSize = parseInt(document.getElementById('region-size').value);
+            
+            document.getElementById('noise-ratio-value').textContent = noiseRatio.toFixed(1);
+            document.getElementById('region-size-value').textContent = regionSize;
+        }
+
+        // 处理图像上传
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // 调整图像大小以提高处理速度
+                    const maxSize = 300;
+                    let { width, height } = img;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        const ratio = Math.min(maxSize / width, maxSize / height);
+                        width *= ratio;
+                        height *= ratio;
+                    }
+
+                    // 在原始图像canvas上绘制
+                    const originalCanvas = document.getElementById('original-canvas');
+                    const ctx = originalCanvas.getContext('2d');
+                    originalCanvas.width = width;
+                    originalCanvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 保存原始图像数据
+                    originalImageData = ctx.getImageData(0, 0, width, height);
+
+                    // 启用按钮
+                    document.getElementById('add-noise-btn').disabled = false;
+                    
+                    // 清空其他canvas
+                    clearCanvas('noise-canvas');
+                    clearCanvas('restored-canvas');
+                    
+                    // 隐藏结果
+                    document.getElementById('restoration-results').style.display = 'none';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 清空canvas
+        function clearCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 添加噪声到图像
+        function addNoiseToImage() {
+            if (!originalImageData) {
+                alert('请先上传图像！');
+                return;
+            }
+
+            const noiseRatio = parseFloat(document.getElementById('noise-ratio').value);
+            const canvas = document.getElementById('noise-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = originalImageData.width;
+            canvas.height = originalImageData.height;
+
+            // 复制原始图像数据
+            noiseImageData = new ImageData(
+                new Uint8ClampedArray(originalImageData.data),
+                originalImageData.width,
+                originalImageData.height
+            );
+
+            // 添加噪声（将像素设为黑色）
+            const data = noiseImageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                if (Math.random() < noiseRatio) {
+                    data[i] = 0;     // R
+                    data[i + 1] = 0; // G
+                    data[i + 2] = 0; // B
+                    // Alpha保持不变
+                }
+            }
+
+            // 显示噪声图像
+            ctx.putImageData(noiseImageData, 0, 0);
+
+            // 启用恢复按钮
+            document.getElementById('restore-btn').disabled = false;
+        }
+
+        // 使用线性回归恢复图像
+        function restoreImage() {
+            if (!noiseImageData) {
+                alert('请先添加噪声！');
+                return;
+            }
+
+            const startTime = performance.now();
+            const regionSize = parseInt(document.getElementById('region-size').value);
+            
+            // 复制噪声图像数据
+            restoredImageData = new ImageData(
+                new Uint8ClampedArray(noiseImageData.data),
+                noiseImageData.width,
+                noiseImageData.height
+            );
+
+            const width = restoredImageData.width;
+            const height = restoredImageData.height;
+            const data = restoredImageData.data;
+
+            // 对每个颜色通道进行恢复
+            for (let channel = 0; channel < 3; channel++) {
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const pixelIndex = (y * width + x) * 4 + channel;
+                        
+                        // 检查是否为噪声点（黑色像素）
+                        if (data[pixelIndex] === 0 && data[pixelIndex + 1] === 0 && data[pixelIndex + 2] === 0) {
+                            // 收集邻域非噪声点
+                            const neighbors = [];
+                            const coords = [];
+                            
+                            for (let dy = -regionSize; dy <= regionSize; dy++) {
+                                for (let dx = -regionSize; dx <= regionSize; dx++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    
+                                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                        const nIndex = (ny * width + nx) * 4 + channel;
+                                        
+                                        // 检查是否为非噪声点
+                                        if (!(data[nIndex] === 0 && data[nIndex + 1] === 0 && data[nIndex + 2] === 0)) {
+                                            neighbors.push(data[nIndex]);
+                                            coords.push([dx, dy]);
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            if (neighbors.length >= 3) {
+                                // 使用简单的线性回归（最小二乘法）
+                                const predictedValue = simpleLinearRegression(coords, neighbors, [0, 0]);
+                                data[pixelIndex] = Math.max(0, Math.min(255, Math.round(predictedValue)));
+                            } else if (neighbors.length > 0) {
+                                // 如果邻域点太少，使用平均值
+                                const avgValue = neighbors.reduce((a, b) => a + b, 0) / neighbors.length;
+                                data[pixelIndex] = Math.max(0, Math.min(255, Math.round(avgValue)));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 显示恢复的图像
+            const canvas = document.getElementById('restored-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.putImageData(restoredImageData, 0, 0);
+
+            const endTime = performance.now();
+            const processingTime = endTime - startTime;
+
+            // 计算恢复误差
+            const error = calculateRestorationError();
+
+            // 显示结果
+            document.getElementById('restoration-results').style.display = 'block';
+            document.getElementById('restoration-metrics').innerHTML = `
+                <p><strong>噪声比率:</strong> ${document.getElementById('noise-ratio').value}</p>
+                <p><strong>邻域大小:</strong> ${regionSize}×${regionSize}</p>
+                <p><strong>恢复误差 (RMSE):</strong> ${error.toFixed(3)}</p>
+                <p><strong>图像尺寸:</strong> ${width}×${height}</p>
+            `;
+            document.getElementById('processing-time').innerHTML = `
+                <p><strong>处理时间:</strong> ${processingTime.toFixed(2)} ms</p>
+            `;
+
+            // 启用下载按钮
+            document.getElementById('download-btn').disabled = false;
+        }
+
+        // 简单线性回归预测
+        function simpleLinearRegression(coords, values, targetCoord) {
+            if (coords.length < 2) return values[0] || 0;
+
+            // 计算均值
+            const n = coords.length;
+            const meanX = coords.reduce((sum, coord) => sum + coord[0], 0) / n;
+            const meanY = coords.reduce((sum, coord) => sum + coord[1], 0) / n;
+            const meanValue = values.reduce((sum, val) => sum + val, 0) / n;
+
+            // 使用距离加权的简单预测
+            let weightedSum = 0;
+            let totalWeight = 0;
+
+            for (let i = 0; i < coords.length; i++) {
+                const distance = Math.sqrt(
+                    Math.pow(coords[i][0] - targetCoord[0], 2) + 
+                    Math.pow(coords[i][1] - targetCoord[1], 2)
+                );
+                const weight = 1 / (distance + 1); // 避免除零
+                weightedSum += values[i] * weight;
+                totalWeight += weight;
+            }
+
+            return totalWeight > 0 ? weightedSum / totalWeight : meanValue;
+        }
+
+        // 计算恢复误差
+        function calculateRestorationError() {
+            if (!originalImageData || !restoredImageData) return 0;
+
+            const originalData = originalImageData.data;
+            const restoredData = restoredImageData.data;
+            let sumSquaredError = 0;
+            let pixelCount = 0;
+
+            for (let i = 0; i < originalData.length; i += 4) {
+                for (let channel = 0; channel < 3; channel++) {
+                    const diff = originalData[i + channel] - restoredData[i + channel];
+                    sumSquaredError += diff * diff;
+                    pixelCount++;
+                }
+            }
+
+            return Math.sqrt(sumSquaredError / pixelCount);
+        }
+
+        // 下载恢复的图像
+        function downloadImage() {
+            if (!restoredImageData) {
+                alert('请先恢复图像！');
+                return;
+            }
+
+            const canvas = document.getElementById('restored-canvas');
+            const link = document.createElement('a');
+            link.download = 'restored_image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // 图像处理相关变量
+        let originalImageData = null;
+        let noiseImageData = null;
+        let restoredImageData = null;
+    </script>
+<script src="../ai-chatbot.js"></script>
+</body>
+</html>
